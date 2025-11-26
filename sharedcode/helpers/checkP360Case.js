@@ -1,7 +1,7 @@
 /*
   Import dependencies
 */
-const { logger } = require('@vtfk/logger')
+const { logger } = require('@vestfoldfylke/loglady')
 const { ARCHIVE } = require('../../config')
 const { callArchive } = require('./call-archive')
 
@@ -11,7 +11,7 @@ const { callArchive } = require('./call-archive')
  */
 module.exports.getCase = async function getCase (casenumber) {
   // Input validation
-  logger('info', ['checkCaseNumber', 'Validating input'])
+  logger.info('Validating input')
   if (!casenumber) throw new Error('Archive casenumber cannot be empty')
   if (!ARCHIVE.ARCHIVE_ENDPOINT) throw new Error('Endpoint environment variable cannot be empty, checkcase')
   if (!ARCHIVE.ARCHIVE_SCOPE) throw new Error('Scope environment variable cannot be empty')
@@ -27,11 +27,11 @@ module.exports.getCase = async function getCase (casenumber) {
       onlyOpenCases: true
     }
   }
-  logger('info', ['checkCaseNumber', 'Checking if the casenumber exist and is open'])
+  logger.info('Checking if the casenumber exist and is open')
   let data = await callArchive('archive', payload)
 
   // Handle and return the response
-  logger('info', ['checkCaseNumber', 'Handle and return the response'])
+  logger.info('Handle and return the response')
   if (!data || !data) return undefined
   if (Array.isArray(data)) {
     if (data.length === 0) return undefined

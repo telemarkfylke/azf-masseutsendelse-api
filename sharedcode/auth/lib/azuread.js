@@ -1,4 +1,5 @@
 const { verify } = require('azure-ad-verify-token')
+const { logger } = require("@vestfoldfylke/loglady");
 const HTTPError = require('../../vtfk-errors/httperror')
 const { AZUREAD_TOKEN_CONFIG, MS, GRAPH } = require('../../../config')
 const getAccessToken = require('../../helpers/get-entraid-token')
@@ -42,7 +43,8 @@ module.exports = async (authHeader) => {
 
   // Grab department with graph
   const accessToken = await getEntraToken()
-  const response = await fetch(`${GRAPH.GRAPH_URL}/users/${validatedToken.upn}?$select=department`, {
+  const url = `${GRAPH.GRAPH_URL}/users/${validatedToken.upn}?$select=department`
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -50,14 +52,16 @@ module.exports = async (authHeader) => {
   })
 
   if (!response.ok) {
-    // TODO: log error with loglady
-    throw new HTTPError(401, 'Not able to contact graph')
+    const errorData = await response.text()
+    logger.error('Failed to contact graph with Url {Url}. Status: {Status}: {StatusText}: {@ErrorData}', url, response.status, response.statusText, errorData)
+    throw new HTTPError(response.status, 'Not able to contact graph')
   }
 
   const data = await response.json()
   validatedToken.department = data?.department
 
   if (!validatedToken.department) {
+    logger.error('Could not find the company department in the authentication token for UPN {UPN}', validatedToken.upn)
     throw new HTTPError(401, 'Could not find the users company department in the authentication token')
   }
 

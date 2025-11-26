@@ -1,6 +1,7 @@
 /*
   Import dependencies
 */
+const { logger } = require("@vestfoldfylke/loglady");
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 const { MATRIKKEL } = require('../config')
 const getAccessToken = require('../sharedcode/helpers/get-entraid-token')
@@ -36,7 +37,8 @@ module.exports = async function (context, req) {
   })
 
   if (!response.ok) {
-    // TODO: log error with loglady
+    const errorData = await response.text()
+    logger.error('Failed to POST to MatrikkelProxyAPI Endpoint {Endpoint}, Status: {Status}: {StatusText}: {@ErrorData}', endpoint, response.status, response.statusText, errorData)
     return new HTTPError(response.status, `MatrikkelProxyAPI responded with status ${response.status}: ${response.statusText}`).toHTTPResponse()
   }
 

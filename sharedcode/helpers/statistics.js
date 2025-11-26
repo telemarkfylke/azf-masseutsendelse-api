@@ -1,6 +1,7 @@
 /*
   Import dependencies
 */
+const { logger } = require("@vestfoldfylke/loglady");
 const { STATISTICS } = require('../../config')
 
 const createStatistics = async (department, id, privatepersons, enterprises) => {
@@ -28,7 +29,8 @@ const createStatistics = async (department, id, privatepersons, enterprises) => 
   })
   
   if (!response.ok) {
-    // TODO: log error with loglady
+    const errorData = await response.text()
+    logger.error('Failed to insert statistics. Status: {Status}: {StatusText}: {@ErrorData}', response.status, response.statusText, errorData)
     return undefined
   }
   
@@ -42,6 +44,7 @@ const createStatistics = async (department, id, privatepersons, enterprises) => 
   }
   
   if (data.length > 1) {
+    logger.error('Failed to insert statistics')
     throw new Error('Was not able to create statistics')
   }
   

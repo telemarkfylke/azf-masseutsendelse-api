@@ -1,3 +1,4 @@
+const { logger } = require("@vestfoldfylke/loglady");
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
@@ -19,8 +20,9 @@ module.exports = async function (context, req) {
   })
   
   if (!response.ok) {
-    // TODO: log error with loglady
-    return new HTTPError(response.status, `Brreg responded with status code ${response.status} for id ${id}: ${response.statusText}`).toHTTPResponse()
+    const errorData = await response.text()
+    logger.error('Failed to get data for EnhetId {EnhetId} from BRReg. Status: {Status}: {StatusText}: {@ErrorData}', id, response.status, response.statusText, errorData)
+    return new HTTPError(response.status, `BRReg responded with status code ${response.status} for id ${id}: ${response.statusText}`).toHTTPResponse()
   }
 
   return await response.json()

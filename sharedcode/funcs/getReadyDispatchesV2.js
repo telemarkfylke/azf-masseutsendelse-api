@@ -1,5 +1,5 @@
 const blobClient = require("@vtfk/azure-blob-client");
-const { logger } = require("@vtfk/logger")
+const { logger } = require('@vestfoldfylke/loglady')
 const { azfHandleResponse } = require("@vtfk/responsehandlers")
 const dayjs = require("dayjs");
 const Dispatches = require('../models/dispatches.js')
@@ -22,7 +22,7 @@ const generatePdfFromTemplate = async (dispatch) => {
     'our-caseworker': dispatch.createdBy
   }
 
-  logger('info', 'Creating the request')
+  logger.info('Creating the request')
   const pdfRequestBody = {
     template: dispatch.template.template,
     documentDefinitionId: dispatch.template.documentDefinitionId || 'brevmal',
@@ -31,7 +31,7 @@ const generatePdfFromTemplate = async (dispatch) => {
 
   // Generate PDF from template
   const legalFilename = dispatch.title.replace(/[/\\?%*:|"<>;¤]/g, '')
-  logger('info', 'Making the request to the PDF api')
+  logger.info('Making the request to the PDF api')
   const response = await fetch(PDFGENERATOR.PDFGENERATOR_ENDPOINT, {
     method: 'POST',
     headers: {
@@ -41,12 +41,13 @@ const generatePdfFromTemplate = async (dispatch) => {
   })
 
   if (!response.ok) {
-    logger('error', `Failed to create a pdf from the template: ${legalFilename}, status: ${response.status}: ${response.statusText}`)
-    throw new HTTPError(400, `Could not generate PDF for dispatch ${dispatch.title}`)
+    const errorData = await response.text()
+    logger.error('Failed to create a pdf from the template: {LegalFilename}, Status: {Status}: {StatusText}: {@ErrorData}', legalFilename, response.status, response.statusText, errorData)
+    throw new HTTPError(response.status, `Could not generate PDF for dispatch ${dispatch.title}`)
   }
 
   const responseData = await response.json()
-  logger('info', `Successfully created a pdf from the template: ${legalFilename}`)
+  logger.info('Successfully created a pdf from the template: {LegalFilename}', legalFilename)
 
   return {
     title: legalFilename,
@@ -58,7 +59,7 @@ const generatePdfFromTemplate = async (dispatch) => {
 
 const retrieveAttachments = async (dispatch) => {
   if (process.env.NODE_ENV === 'test') {
-    logger('info', 'Currently in test, will not look for attachments')
+    logger.info('Currently in test, will not look for attachments')
     return [
       {
         title: 'test',
@@ -68,32 +69,32 @@ const retrieveAttachments = async (dispatch) => {
     ]
   }
 
-  logger('info', 'Retrieving the attachments if any attachments was added')
+  logger.info('Retrieving the attachments if any attachments was added')
   if (!Array.isArray(dispatch.attachments) || dispatch.attachments.length === 0) {
-    logger('info', 'No attachments found')
+    logger.info('No attachments found')
     return []
   }
 
-  logger('info', `${dispatch.attachments.length} attachment(s) found`)
+  logger.info('{DispatchAttachmentCount} attachment(s) found', dispatch.attachments.length)
   const attachments = []
   for (const attachment of dispatch.attachments) {
-    logger('info', `Fetching the attachment: ${attachment.name} from blob storage`)
+    logger.info('Fetching the attachment: {AttachmentName} from blob storage', attachment.name)
     const file = await blobClient.get(`${dispatch._id}/${attachment.name}`)
 
     // Validate the files
     if (!file || !file.data || file.data.length === 0) {
-      logger('error', 'No files found, check if you passed the right filename and/or the right dispatchId')
+      logger.error('No files found, check if you passed the right filename and/or the right dispatchId')
       throw new HTTPError(404, 'No files found, check if you passed the right filename and/or the right dispatchId')
     }
 
-    logger('info', `Successfully fetched the attachment: ${attachment.name} from blob storage, validating the file.`)
+    logger.info('Successfully fetched the attachment: {AttachmentName} from blob storage, validating the file.', attachment.name)
     if (file.data.startsWith('data:') && file.data.includes(',')) {
       file.data = file.data.substring(file.data.indexOf(',') + 1)
     }
     if (file.name.includes('.')) {
       file.name = file.name.substring(0, file.name.indexOf('.'))
     }
-    logger('info', `Attachment: ${attachment.name} is valid, pushing it to the file array.`)
+    logger.info('Attachment: {AttachmentName} is valid, pushing it to the file array.', attachment.name)
 
     attachments.push({
       title: file.name,
@@ -110,14 +111,14 @@ module.exports = async function getReadyDispatchesV2(context, req) {
   const dispatchJobs = []
 
   // Await the DB connection
-  logger('info', 'Connecting to DB')
+  logger.info('Connecting to DB')
   await getDb()
 
   // Find all dispatches
-  logger('info', 'Looking for jobs to handle')
+  logger.info('Looking for jobs to handle')
   const d = await Dispatches.findOne({ status: 'approved' })
   if (d === null) {
-    logger('info', 'No jobs found')
+    logger.info('No jobs found')
     return azfHandleResponse('No jobs found', context, req)
   }
 
@@ -130,7 +131,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
   // Loop through all dispatches
   for (const dispatch of dispatches) {
     // Validate if the dispatch is ready
-    logger('info', 'Found a job to handle, checking if it has passed the registration threshold')
+    logger.info('Found a job to handle, checking if it has passed the registration threshold')
     if (!dispatch.approvedTimestamp) continue
 
     // Check if the dispatch has passed the registration threshold
@@ -139,7 +140,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
 
     // If true, registration threshold check will be skipped and jobs will be created.
     if (!MISC.BYPASS_REGISTRATION_THRESHOLD) {
-      logger('info', 'Checking registration threshold, will create jobs if it is passed.')
+      logger.info('Checking registration threshold, will create jobs if it is passed.')
       if (dayjs(new Date()).isBefore(registrationThreshold)) continue
     }
 
@@ -166,7 +167,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
     }
 
     // Generate PDF from template, if applicable
-    logger('info', 'Generating PDF from template if a template was used in the dispatch (brevmal)')
+    logger.info('Generating PDF from template if a template was used in the dispatch (brevmal)')
     if (dispatch.template?.template) {
       const generatedPdf = await generatePdfFromTemplate(dispatch)
       dispatchFiles.push(generatedPdf)
@@ -181,7 +182,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
     // Create the archive task
     const personArray = []
     const businessArray = []
-    logger('info', `Creating the archive task, for dispatchID: ${dispatch._id}`)
+    logger.info('Creating the archive task, for dispatchID: {DispatchId}', dispatch._id)
     for (const owner of dispatch.owners) {
       if (owner._type.toLowerCase().includes('juridisk')) {
         businessArray.push({
@@ -194,7 +195,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
       }
     }
 
-    logger('info', `Creating the task to sync recipients in archive, for dispatchID: ${dispatch._id}`)
+    logger.info('Creating the task to sync recipients in archive, for dispatchID: {DispatchId}', dispatch._id)
     // Create tasks for create/update private persons
     personArray.forEach((person) => {
       dispatchJob.tasks.syncRecipients.push({
@@ -213,7 +214,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
         ssn: business.orgnr
       })
     })
-    logger('info', `Creating the archive caseDocument task, for dispatchID: ${dispatch._id}`)
+    logger.info('Creating the archive caseDocument task, for dispatchID: {DispatchId}', dispatch._id)
     // Create the p360 caseDocument
     dispatchJob.tasks.createCaseDocument.push({
       method: 'archive',
@@ -238,7 +239,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
       // Create one uploadDocuments-job pr. Attachment
       let fileIndex = -1
       for (const file of dispatchFiles) {
-        logger('info', `Creating the archive uploadDocuments task, for attachment: ${file.title} with dispatchID: ${dispatch._id}`)
+        logger.info('Creating the archive uploadDocuments task, for attachment: {FileTitle} with dispatchID: {DispatchId}', file.title, dispatch._id)
         fileIndex++
         if (fileIndex === 0) continue
         dispatchJob.tasks.uploadAttachments.push({
@@ -259,7 +260,7 @@ module.exports = async function getReadyDispatchesV2(context, req) {
     }
 
     // Create task to send to each contact
-    logger('info', `Creating the archive issueDispatch task, for dispatchID: ${dispatch._id}`)
+    logger.info('Creating the archive issueDispatch task, for dispatchID: {DispatchId}', dispatch._id)
     dispatchJob.tasks.issueDispatch.push({
       dataMapping: '{"parameter": { "Documents": [ { "DocumentNumber": "{{DocumentNumber}}" }]}}',
       data: {
@@ -274,11 +275,11 @@ module.exports = async function getReadyDispatchesV2(context, req) {
 
   let updatedDispatch = {}
   if (dispatchJobs.length > 0) {
-    logger('info', 'Creating a new job and saving it to the Jobs collection')
+    logger.info('Creating a new job and saving it to the Jobs collection')
     const job = new Jobs(...dispatchJobs)
     // Save the new dispatch to the database
     await job.save()
-    logger('info', `Successfully saved the job to the Jobs collection with the id: ${job._id}`)
+    logger.info('Successfully saved the job to the Jobs collection with the id: {JobId}', job._id)
     // Set dispatch to completed and wipe data that is not needed.
     const filter = { _id: job._id }
     const update = {
@@ -287,12 +288,12 @@ module.exports = async function getReadyDispatchesV2(context, req) {
       excludedOwners: [],
       matrikkelUnitsWithoutOwners: []
     }
-    logger('info', `Updating and wiping the dispatch with id: ${job._id} for personal information`)
+    logger.info('Updating and wiping the dispatch with id: {JobId} for personal information', job._id)
     updatedDispatch = await Dispatches.findOneAndUpdate(filter, update, {
       new: true
     })
 
-    logger('info', `Successfully updated the dispatch with id: ${job._id}`)
+    logger.info('Successfully updated the dispatch with id: {JobId}', job._id)
     await alertTeams([], 'completed', [], 'Jobs have now been created for the dispatch, everything went well', job._id, context.executionContext.functionName)
   }
 

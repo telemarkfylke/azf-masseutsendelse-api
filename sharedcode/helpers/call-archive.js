@@ -1,3 +1,4 @@
+const { logger } = require("@vestfoldfylke/loglady");
 const { ARCHIVE } = require('../../config')
 const getAccessToken = require('./get-entraid-token')
 const HTTPError = require('../vtfk-errors/httperror.js')
@@ -13,7 +14,8 @@ module.exports.callArchive = async (endpoint, payload) => {
   })
   
   if (!response.ok) {
-    // TODO: log error with loglady
+    const errorData = await response.text()
+    logger.error('Failed calling archive service with Endpoint {Endpoint}. Status: {Status}: {StatusText}: {@ErrorData}', endpoint, response.status, response.statusText, errorData)
     throw new HTTPError(response.status, `Error calling archive service: ${response.statusText}`)
   }
   

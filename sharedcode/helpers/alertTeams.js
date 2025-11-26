@@ -1,3 +1,4 @@
+const { logger } = require("@vestfoldfylke/loglady");
 const { MS } = require('../../config')
 
 const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoint) => {
@@ -97,15 +98,16 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
   //   }]
   // }
   const headers = { contentType: 'application/vnd.microsoft.teams.card.o365connector' }
-  const result = await fetch(MS.TEAMS_WEBHOOK_URL, {
+  const response = await fetch(MS.TEAMS_WEBHOOK_URL, {
     method: 'POST',
     headers,
     body: JSON.stringify(teamsMsg)
   })
   
-  if (!result.ok) {
-    // TODO: log error with loglady
-    throw new Error(`Failed to send Teams alert: ${result.status} ${result.statusText}`)
+  if (!response.ok) {
+    const errorData = await response.text()
+    logger.error('Failed to send Teams alert. Status: {Status}: {StatusText}: {@ErrorData}', response.status, response.statusText, errorData)
+    throw new Error(`Failed to send Teams alert: ${response.status} ${response.statusText}`)
   }
 }
 

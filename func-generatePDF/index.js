@@ -1,5 +1,6 @@
-const { PDFGENERATOR } = require('../config')
+const { logger } = require('@vestfoldfylke/loglady')
 const { azfHandleResponse } = require('@vtfk/responsehandlers')
+const { PDFGENERATOR } = require('../config')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
@@ -43,7 +44,8 @@ module.exports = async function (context, req) {
   })
   
   if (!response.ok) {
-    // TODO: log error with loglady
+    const errorData = await response.text()
+    logger.error('Failed to create a pdf. Status: {Status}: {StatusText}: {@ErrorData}', response.status, response.statusText, errorData)
     return new HTTPError(response.status, `Error from PDF Generator: ${response.statusText}`).toHTTPResponse()
   }
 

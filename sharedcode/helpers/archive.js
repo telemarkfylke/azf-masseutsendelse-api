@@ -1,17 +1,18 @@
 /*
   Import dependencies
 */
+const { logger } = require('@vestfoldfylke/loglady')
 const { ARCHIVE } = require('../../config')
 const { callArchive } = require('./call-archive')
-const { logger } = require('@vtfk/logger')
 
 /**
  * Attempt to get a case from P360
- * @param {string} casenumber The P360 casenumber to check if exists
+ * @param {string} number SSN if <b>method</b> is SyncPrivatePerson, ORG.NR if <b>method</b> is SyncEnterprise
+ * @param {string} method The method to use when calling archive
  */
 const syncRecipient = async (number, method) => {
   // Input validation
-  logger('info', ['syncPrivatePerson', 'Validating input'])
+  logger.info('Validating input')
   if (!number) throw new Error('SSN cannot be empty')
   if (!method) throw new Error('Method cannot be empty')
   if (!ARCHIVE.ARCHIVE_ENDPOINT) throw new Error('Endpoint environment variable cannot be empty, sync recipient')
@@ -20,15 +21,15 @@ const syncRecipient = async (number, method) => {
   // Make the request
   let data
   if (method === 'SyncPrivatePerson') {
-    logger('info', ['syncPrivatePerson', 'Syncing private person'])
+    logger.info('Syncing private person')
     data = await callArchive(method, { ssn: number })
   } else {
-    logger('info', ['syncEnterprise', 'Syncing enterprise person'])
+    logger.info('Syncing enterprise person')
     data = await callArchive(method, { orgnr: number })
   }
 
   // Handle and return the response
-  logger('info', ['syncPrivatePerson', 'Handle and return the response'])
+  logger.info('Handle and return the response')
   if (data.status !== 200) return data[0]
   if (!data) return undefined
   if (Array.isArray(data)) {
@@ -41,7 +42,7 @@ const syncRecipient = async (number, method) => {
 
 const addAttachment = async (method, documentNumber, base64, format, title) => {
   // Input validation
-  logger('info', ['addAttachment', 'Validating input'])
+  logger.info('Validating input')
   if (!title) throw new Error('title cannot be empty')
   if (!method) throw new Error('Method cannot be empty')
   if (!base64) throw new Error('base64 cannot be empty')
@@ -52,7 +53,7 @@ const addAttachment = async (method, documentNumber, base64, format, title) => {
 
   // Build the payload
   const payload = {
-    system: 'archive', // NB! Denne referere til hvilken system template som skal brukes "archive-add-attachment", se https://github.com/vtfk/azf-archive/tree/master/templates
+    system: 'archive', // NB! Denne refererer til hvilken system template som skal brukes "archive-add-attachment", se https://github.com/vtfk/azf-archive/tree/master/templates
     template: 'add-attachment',
     parameter: {
       documentNumber,
@@ -63,11 +64,11 @@ const addAttachment = async (method, documentNumber, base64, format, title) => {
     }
   }
 
-  logger('info', ['addAttachment', 'Adding attachment'])
+  logger.info('Adding attachment')
   let data = await callArchive(method, payload)
 
   // Handle and return the response
-  logger('info', ['addAttachment', 'Handle and return the response'])
+  logger.info('Handle and return the response')
   if (!data) return undefined
   if (Array.isArray(data)) {
     if (data.length === 0) return undefined
@@ -79,7 +80,7 @@ const addAttachment = async (method, documentNumber, base64, format, title) => {
 
 const createCaseDocument = async (method, title, caseNumber, date, contacts, attachments, paragraph, responsiblePersonEmail) => {
   // Input validation
-  logger('info', ['createCaseDocument', 'Validating input'])
+  logger.info('Validating input')
   if (!method) throw new Error('Method cannot be empty')
   if (!title) throw new Error('title cannot be empty')
   if (!caseNumber) throw new Error('caseNumber cannot be empty')
@@ -105,11 +106,11 @@ const createCaseDocument = async (method, title, caseNumber, date, contacts, att
       responsiblePersonEmail
     }
   }
-  logger('info', ['createCaseDocument', 'Creating the casedocument'])
+  logger.info('Creating the casedocument')
   let data = await callArchive(method, payload)
 
   // Handle and return the response
-  logger('info', ['createCaseDocument', 'Handle and return the response'])
+  logger.info('Handle and return the response')
   if (!data) return undefined
   if (Array.isArray(data)) {
     if (data.length === 0) return undefined
@@ -121,7 +122,7 @@ const createCaseDocument = async (method, title, caseNumber, date, contacts, att
 
 const dispatchDocuments = async (documents, method) => {
   // Input validation
-  logger('info', ['dispatchDocuments', 'Validating input'])
+  logger.info('Validating input')
   if (!documents) throw new Error('Documents cannot be empty')
   if (documents.length < 0) throw new Error('Documents array must contain minimum one document')
   if (!ARCHIVE.ARCHIVE_ENDPOINT) throw new Error('Endpoint environment variable cannot be empty, dispatch doc')
@@ -138,10 +139,10 @@ const dispatchDocuments = async (documents, method) => {
     }
   }
 
-  logger('info', ['dispatchDocuments', 'Dispatching documents'])
+  logger.info('Dispatching documents')
   let data = await callArchive(method, payload)
   // Handle and return the response
-  logger('info', ['dispatchDocuments', 'Handle and return the response'])
+  logger.info('Handle and return the response')
   if (!data) return undefined
   if (Array.isArray(data)) {
     if (data[0].Successful !== true) throw new Error(`Was not able to dispatch the documents: ${documents}`)
