@@ -1,8 +1,9 @@
-const Templates = require('../sharedcode/models/templates.js')
-const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const utils = require('@vtfk/utilities')
+const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Templates = require('../sharedcode/models/templates.js')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
+const { response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   try {
@@ -21,14 +22,18 @@ module.exports = async function (context, req) {
     // Get ID from request
     const id = context.bindingData.id
 
-    if (!id) throw new HTTPError(400, 'No template id was provided')
+    if (!id) {
+      return new HTTPError(400, 'No template id was provided').toHTTPResponse()
+    }
 
     // Await the database
     await getDb()
 
     // Get the existing record
     const existingTemplate = await Templates.findById(id).lean()
-    if (!existingTemplate) throw new HTTPError(400, `Template with id ${id} could no be found`)
+    if (!existingTemplate) {
+      return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
+    }
 
     // Increment the version number
     req.body.version = existingTemplate.version + 1
@@ -36,8 +41,9 @@ module.exports = async function (context, req) {
     // Update the template
     const updatedTemplate = await Templates.findByIdAndUpdate(id, req.body, { new: true })
 
-    return await azfHandleResponse(updatedTemplate, context, req)
+    return response(updatedTemplate)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to put templates')
+    return response('Failed to put templates', 400)
   }
 }

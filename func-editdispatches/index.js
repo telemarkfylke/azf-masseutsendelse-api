@@ -1,10 +1,11 @@
-const Dispatches = require('../sharedcode/models/dispatches.js')
-const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
-const utils = require('@vtfk/utilities')
-const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const validate = require('../sharedcode/validators/dispatches').validate
+const { logger } = require("@vestfoldfylke/loglady");
 const blobClient = require('@vtfk/azure-blob-client')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
+const utils = require('@vtfk/utilities')
+const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Dispatches = require('../sharedcode/models/dispatches.js')
+const { response } = require('../sharedcode/response/response-handler')
+const validate = require('../sharedcode/validators/dispatches').validate
+const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
   try {
@@ -30,21 +31,27 @@ module.exports = async function (context, req) {
     // Get ID from request
     const id = context.bindingData.id
 
-    // Await the Db conection
+    // Await the Db connection
     await getDb()
 
-    // Get the existing disptach object
+    // Get the existing dispatch object
     const existingDispatch = await Dispatches.findById(id).lean()
-    if (!existingDispatch) throw new HTTPError(404, `Dispatch with id ${id} could not be found`)
+    if (!existingDispatch) {
+      return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse()
+    }
 
     // If the status is running or completed, only status is allowed to be updated
-    if (existingDispatch.status === 'inprogress' && req.body.status !== 'completed') throw new HTTPError(400, 'No changes can be done to a running dispatch except setting it to completed')
+    if (existingDispatch.status === 'inprogress' && req.body.status !== 'completed') {
+      return new HTTPError(400, 'No changes can be done to a running dispatch except setting it to completed').toHTTPResponse()
+    }
     if (existingDispatch.status === 'inprogress' && req.body.status === 'completed') {
       const result = await Dispatches.findByIdAndUpdate(id, { status: 'completed' }, { new: true })
       return context.res.status(201).send(result)
     }
     // Failsafe
-    if (existingDispatch.status === 'inprogress' || existingDispatch.status === 'completed') throw new HTTPError(400, 'No changes can be done to running or completed dispatches')
+    if (existingDispatch.status === 'inprogress' || existingDispatch.status === 'completed') {
+      return new HTTPError(400, 'No changes can be done to running or completed dispatches').toHTTPResponse()
+    }
 
     // Update fields
     req.body.validatedArchivenumber = existingDispatch.validatedArchivenumber
@@ -62,7 +69,7 @@ module.exports = async function (context, req) {
       req.body.approvedTimestamp = ''
     }
 
-    // Validate dispatch against schenarios that cannot be described by schema
+    // Validate dispatch against scenarios that cannot be described by schema
     // const toValidate = {...existingDispatch, ...req.body}
     await validate(req.body)
     req.body.validatedArchivenumber = req.body.archivenumber
@@ -72,11 +79,17 @@ module.exports = async function (context, req) {
     if (req.body.attachments && Array.isArray(req.body.attachments) && req.body.attachments.length > 0) {
       req.body.attachments.forEach((i) => {
         const split = i.name.split('.')
-        if (split.length === 1) throw new HTTPError(400, 'All filenames must have an extension')
+        if (split.length === 1) {
+          return new HTTPError(400, 'All filenames must have an extension').toHTTPResponse()
+        }
         const extension = split[split.length - 1]
-        if (!allowedExtensions.includes(extension.toLowerCase())) throw new HTTPError(400, `The file extension ${extension} is not allowed`)
+        if (!allowedExtensions.includes(extension.toLowerCase())) {
+          return new HTTPError(400, `The file extension ${extension} is not allowed`).toHTTPResponse()
+        }
         blobClient.unallowedPathCharacters.forEach((char) => {
-          if (i.name.includes(char)) throw new HTTPError(400, `${i} cannot contain illegal character ${char}`)
+          if (i.name.includes(char)) {
+            return new HTTPError(400, `${i} cannot contain illegal character ${char}`).toHTTPResponse()
+          }
         })
       })
     }
@@ -100,8 +113,9 @@ module.exports = async function (context, req) {
     }
 
     // Return the dispatch
-    return await azfHandleResponse(updatedDispatch, context, req)
+    return response(updatedDispatch)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to put edit dispatches')
+    return response('Failed to put edit dispatches', 400)
   }
 }

@@ -1,6 +1,6 @@
 const { logger } = require('@vestfoldfylke/loglady')
-const { azfHandleResponse } = require('@vtfk/responsehandlers')
 const { PDFGENERATOR } = require('../config')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
@@ -37,17 +37,19 @@ module.exports = async function (context, req) {
   }
 
   // Make the request
-  const response = await fetch(PDFGENERATOR.PDFGENERATOR_ENDPOINT, {
+  const responseRequest = await fetch(PDFGENERATOR.PDFGENERATOR_ENDPOINT, {
     method: 'POST',
     headers,
     body: JSON.stringify(requestData)
   })
   
-  if (!response.ok) {
-    const errorData = await response.text()
-    logger.error('Failed to create a pdf. Status: {Status}: {StatusText}: {@ErrorData}', response.status, response.statusText, errorData)
-    return new HTTPError(response.status, `Error from PDF Generator: ${response.statusText}`).toHTTPResponse()
+  if (!responseRequest.ok) {
+    const errorData = await responseRequest.text()
+    logger.error('Failed to create a pdf. Status: {Status}: {StatusText}: {@ErrorData}', responseRequest.status, responseRequest.statusText, errorData)
+    return new HTTPError(responseRequest.status, `Error from PDF Generator: ${responseRequest.statusText}`).toHTTPResponse()
   }
+  
+  const responseData = await responseRequest.json()
 
-  return await azfHandleResponse(request.data, context, req, 200)
+  return response(responseData)
 }

@@ -1,7 +1,8 @@
-const Templates = require('../sharedcode/models/templates.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Templates = require('../sharedcode/models/templates.js')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 
 module.exports = async function (context, req) {
   try {
@@ -11,20 +12,25 @@ module.exports = async function (context, req) {
     // Get ID from request
     const id = context.bindingData.id
 
-    if (!id) throw new HTTPError('400', 'No template id was provided')
+    if (!id) {
+      return new HTTPError('400', 'No template id was provided').toHTTPResponse()
+    }
 
     // Await the database
     await getDb()
 
     // Find Template by ID
     const template = await Templates.findById(id)
-    if (!template) throw new HTTPError('400', `Template with id ${id} could no be found`)
+    if (!template) {
+      return new HTTPError('400', `Template with id ${id} could no be found`).toHTTPResponse()
+    }
 
     // Return the template object
     const templateById = await Templates.findById(id, req.body, { new: true })
 
-    return await azfHandleResponse(templateById, context, req)
+    return response(templateById)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to get templates by id')
+    return response('Failed to get template by id', 400)
   }
 }

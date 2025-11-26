@@ -3,11 +3,11 @@ const Jobs = require('../sharedcode/models/jobs.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
 
 const { logger } = require('@vestfoldfylke/loglady')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const { alertTeams } = require('../sharedcode/helpers/alertTeams.js')
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require('../sharedcode/helpers/archive.js')
 const { createStatistics } = require('../sharedcode/helpers/statistics.js')
-const { alertTeams } = require('../sharedcode/helpers/alertTeams.js')
+const { response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   let jobId
@@ -41,7 +41,7 @@ module.exports = async function (context, req) {
       // await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'failed task' , [], undefined, context.executionContext.functionName)
       // await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'funcgetandlejobsDev failed', [], 'no id found', context.executionContext.functionName)
       // await alertTeams({}, 'completed', {}, 'This job is done', 'et endpoint') Dette er ikke teams webhooken glad i
-      return await azfHandleResponse('No jobs found', context, req)
+      return response('No jobs found')
     }
 
     const taskArr = []
@@ -522,9 +522,10 @@ module.exports = async function (context, req) {
         }
       }
     }
-    return await azfHandleResponse(taskArr, context, req)
+
+    return response(taskArr)
   } catch (error) {
-    logger.errorException(error, 'The job with the job id: {JobId} failed', jobId)
-    return await azfHandleError(error, context, req)
+    logger.errorException(error, 'The job with the JobId: {JobId} failed', jobId)
+    return response(`The job with the JobId ${jobId} failed`, 400)
   }
 }

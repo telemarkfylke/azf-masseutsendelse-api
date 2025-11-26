@@ -1,12 +1,13 @@
-const Dispatches = require('../sharedcode/models/dispatches.js')
-const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const { logger } = require("@vestfoldfylke/loglady");
+const blobClient = require('@vtfk/azure-blob-client')
 const utils = require('@vtfk/utilities')
 const { ObjectID } = require('mongodb')
+const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Dispatches = require('../sharedcode/models/dispatches.js')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror.js')
 const validate = require('../sharedcode/validators/dispatches').validate
-const blobClient = require('@vtfk/azure-blob-client')
 const { STORAGE } = require('../config')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 
 module.exports = async function (context, req) {
   try {
@@ -30,7 +31,7 @@ module.exports = async function (context, req) {
     req.body.modifiedByEmail = requestor.email
     req.body.modifiedByDepartment = requestor.department
 
-    // Validate dispatch against schenarios that cannot be described by schema
+    // Validate dispatch against scenarios that cannot be described by schema
     await validate(req.body)
     req.body.validatedArchivenumber = req.body.archivenumber
 
@@ -43,22 +44,26 @@ module.exports = async function (context, req) {
       console.log('This is a test, uploading to blob is skipped. Any code inside the else statement will not be tested!')
       if (req.body.attachments && Array.isArray(req.body.attachments) && req.body.attachments.length > 0) {
         if (!process.env.AZURE_BLOB_CONNECTIONSTRING_TEST || !process.env.AZURE_BLOB_CONTAINERNAME_TEST) {
-          throw new HTTPError(500, 'Cannot upload attachments when azure blob storage is not configured')
+          return new HTTPError(500, 'Cannot upload attachments when azure blob storage is not configured').toHTTPResponse()
         }
         for (const blob of req.body.attachments) {
           for (const char of blobClient.unallowedPathCharacters) {
-            if (blob.name.includes(char)) throw new HTTPError(400, `${blob.name} contains the illegal character ${char}`)
+            if (blob.name.includes(char)) {
+              return new HTTPError(400, `${blob.name} contains the illegal character ${char}`).toHTTPResponse()
+            }
           }
         }
       }
     } else {
       if (req.body.attachments && Array.isArray(req.body.attachments) && req.body.attachments.length > 0) {
         if (!STORAGE.AZURE_BLOB_CONNECTIONSTRING || !STORAGE.AZURE_BLOB_CONTAINERNAME) {
-          throw new HTTPError(500, 'Cannot upload attachments when azure blob storage is not configured')
+          return new HTTPError(500, 'Cannot upload attachments when azure blob storage is not configured').toHTTPResponse()
         }
         for (const blob of req.body.attachments) {
           for (const char of blobClient.unallowedPathCharacters) {
-            if (blob.name.includes(char)) throw new HTTPError(400, `${blob.name} contains the illegal character ${char}`)
+            if (blob.name.includes(char)) {
+              return new HTTPError(400, `${blob.name} contains the illegal character ${char}`).toHTTPResponse()
+            }
           }
         }
       }
@@ -75,19 +80,26 @@ module.exports = async function (context, req) {
     if (req.body.attachments || Array.isArray(req.body.attachments)) {
       for await (const file of req.body.attachments) {
         const split = file.name.split('.')
-        if (split.length === 1) throw new HTTPError(400, 'All filenames must have an extension')
+        if (split.length === 1) {
+          return new HTTPError(400, 'All filenames must have an extension').toHTTPResponse()
+        }
         const extension = split[split.length - 1]
-        if (!allowedExtensions.includes(extension.toLowerCase())) throw new HTTPError(400, `The file extension ${extension} is not allowed`)
+        if (!allowedExtensions.includes(extension.toLowerCase())) {
+          return new HTTPError(400, `The file extension ${extension} is not allowed`).toHTTPResponse()
+        }
 
-        if (file.name && file.name.includes('/')) throw new HTTPError(400, 'Illigal character in filname, "/" is not allowed.')
+        if (file.name && file.name.includes('/')) {
+          return new HTTPError(400, 'Illigal character in filname, "/" is not allowed.').toHTTPResponse()
+        }
         if (!file.name) file.name = file._id
 
         if (process.env.NODE_ENV !== 'test') await blobClient.save(`${req.body._id}/${file.name}`, file.data)
       }
     }
 
-    return await azfHandleResponse(results, context, req)
+    return response(results)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to post dispatches')
+    return response('Failed to post dispatches', 400)
   }
 }

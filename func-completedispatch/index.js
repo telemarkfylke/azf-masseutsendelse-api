@@ -1,24 +1,31 @@
-const Dispatches = require('../sharedcode/models/dispatches.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Dispatches = require('../sharedcode/models/dispatches.js')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 
 module.exports = async function (context, req) {
   try {
     // Get the ID from the request
     const id = context.bindingData.id
-    if (!id) throw new HTTPError(400, 'You cannot complete a dispatch without providing an id')
+    if (!id) {
+      return new HTTPError(400, 'You cannot complete a dispatch without providing an id').toHTTPResponse()
+    }
 
     // Authentication / Authorization
     const requestor = await require('../sharedcode/auth/auth').auth(req)
 
-    // Await the DB conection
+    // Await the DB connection
     await getDb()
 
-    // Get the existing disptach object
+    // Get the existing dispatch object
     const existingDispatch = await Dispatches.findById(id).lean()
-    if (!existingDispatch) throw new HTTPError(404, `Dispatch with id ${id} could not be found`)
-    if (existingDispatch.status !== 'approved') throw new HTTPError(404, 'Cannot complete a dispatch that is not approved')
+    if (!existingDispatch) {
+      return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse()
+    }
+    if (existingDispatch.status !== 'approved') {
+      return new HTTPError(404, 'Cannot complete a dispatch that is not approved').toHTTPResponse()
+    }
 
     // Set completed information
     const completedData = {
@@ -37,8 +44,9 @@ module.exports = async function (context, req) {
     // Update the dispatch
     const updatedDispatch = await Dispatches.findByIdAndUpdate(id, completedData, { new: true })
 
-    return await azfHandleResponse(updatedDispatch, context, req)
+    return response(updatedDispatch)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to put completed dispatch')
+    return response('Failed to put completed dispatch', 400)
   }
 }

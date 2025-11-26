@@ -1,7 +1,8 @@
-const Dispatches = require('../sharedcode/models/dispatches.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Dispatches = require('../sharedcode/models/dispatches.js')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 
 module.exports = async function (context, req) {
   try {
@@ -10,20 +11,25 @@ module.exports = async function (context, req) {
 
     // Get ID from request
     const id = context.bindingData.id
-    if (!id) throw new HTTPError(400, 'No dispatch id was provided')
+    if (!id) {
+      return new HTTPError(400, 'No dispatch id was provided').toHTTPResponse()
+    }
 
     // Await the database
     await getDb()
 
     // Find Dispatch by ID
-    const disptach = await Dispatches.findById(id)
-    if (!disptach) throw new HTTPError(404, `Disptach with id ${id} could no be found`)
+    const dispatch = await Dispatches.findById(id)
+    if (!dispatch) {
+      return new HTTPError(404, `Dispatch with id ${id} could no be found`).toHTTPResponse()
+    }
 
     // Return the dispatch object
-    const disptachById = await Dispatches.findById(id, req.body, { new: true })
+    const dispatchById = await Dispatches.findById(id, req.body, { new: true })
 
-    return await azfHandleResponse(disptachById, context, req)
+    return response(dispatchById)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to get dispatches by id')
+    return response('Failed to get dispatches by id', 400)
   }
 }

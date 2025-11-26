@@ -1,6 +1,7 @@
-const Dispatches = require('../sharedcode/models/dispatches.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
+const Dispatches = require('../sharedcode/models/dispatches.js')
+const { response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   try {
@@ -10,7 +11,7 @@ module.exports = async function (context, req) {
     // Await the DB connection
     await getDb()
 
-    // Find all disptaches
+    // Find all dispatches
     let dispatches = []
     if (req.query?.full === true || req.query?.full === 'true') dispatches = await Dispatches.find({})
     else dispatches = await Dispatches.find({}).select('-owners -excludedOwners -matrikkelUnitsWithoutOwners')
@@ -18,9 +19,10 @@ module.exports = async function (context, req) {
     // If no dispatches was found
     if (!dispatches) dispatches = []
 
-    // Return the disptaches
-    return await azfHandleResponse(dispatches, context, req)
+    // Return the dispatches
+    return response(dispatches)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to get dispatches')
+    return response('Failed to get dispatches', 400)
   }
 }

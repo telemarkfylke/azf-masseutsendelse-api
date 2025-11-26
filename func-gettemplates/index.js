@@ -1,7 +1,8 @@
-const Templates = require('../sharedcode/models/templates.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Templates = require('../sharedcode/models/templates.js')
+const { response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
 
 module.exports = async function (context, req) {
   try {
@@ -13,11 +14,14 @@ module.exports = async function (context, req) {
 
     // Find all the templates
     const templates = await Templates.find({})
-    if (!templates) throw new HTTPError(404, 'No templates found in the databases')
+    if (!templates) {
+      return new HTTPError(404, 'No templates found in the databases').toHTTPResponse()
+    }
 
     // Return the Templates
-    return await azfHandleResponse(templates, context, req)
+    return response(templates)
   } catch (err) {
-    return await azfHandleError(err, context, req)
+    logger.errorException(err, 'Failed to get templates')
+    return response('Failed to get templates', 400)
   }
 }

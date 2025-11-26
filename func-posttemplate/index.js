@@ -1,7 +1,8 @@
-const Templates = require('../sharedcode/models/templates.js')
-const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const { logger } = require("@vestfoldfylke/loglady");
 const utils = require('@vtfk/utilities')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
+const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
+const Templates = require('../sharedcode/models/templates.js')
+const { response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   try {
@@ -30,8 +31,9 @@ module.exports = async function (context, req) {
     const result = await template.save()
 
     // Return the result
-    return await azfHandleResponse(result, context, req)
+    return response(result)
   } catch (err) {
-    return await azfHandleError(err, context, req)
-  };
+    logger.errorException(err, 'Failed to post template')
+    return response('Failed to post template', 400)
+  }
 }

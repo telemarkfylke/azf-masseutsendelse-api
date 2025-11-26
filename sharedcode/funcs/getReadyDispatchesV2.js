@@ -1,11 +1,11 @@
 const blobClient = require("@vtfk/azure-blob-client");
 const { logger } = require('@vestfoldfylke/loglady')
-const { azfHandleResponse } = require("@vtfk/responsehandlers")
 const dayjs = require("dayjs");
-const Dispatches = require('../models/dispatches.js')
-const Jobs = require("../models/jobs");
 const getDb = require('../connections/masseutsendelseDB.js')
 const { alertTeams } = require("../helpers/alertTeams");
+const Dispatches = require('../models/dispatches.js')
+const Jobs = require("../models/jobs");
+const { response } = require('../response/response-handler')
 const HTTPError = require("../vtfk-errors/httperror");
 const { PDFGENERATOR, MISC } = require("../../config")
 
@@ -119,13 +119,14 @@ module.exports = async function getReadyDispatchesV2(context, req) {
   const d = await Dispatches.findOne({ status: 'approved' })
   if (d === null) {
     logger.info('No jobs found')
-    return azfHandleResponse('No jobs found', context, req)
+    return response('No jobs found')
   }
 
   const dispatches = []
   dispatches.push(await d)
   if (dispatches.length === 0) {
-    return azfHandleResponse('No jobs found', context, req)
+    logger.info('No jobs found')
+    return response('No jobs found')
   }
 
   // Loop through all dispatches
@@ -297,5 +298,5 @@ module.exports = async function getReadyDispatchesV2(context, req) {
     await alertTeams([], 'completed', [], 'Jobs have now been created for the dispatch, everything went well', job._id, context.executionContext.functionName)
   }
 
-  return await azfHandleResponse(updatedDispatch, context, req)
+  return response(updatedDispatch)
 }

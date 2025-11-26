@@ -3,7 +3,7 @@ const Jobs = require('../sharedcode/models/jobs.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
 
 const { logger } = require('@vestfoldfylke/loglady')
-const { azfHandleResponse, azfHandleError } = require('@vtfk/responsehandlers')
+const { response } = require('../sharedcode/response/response-handler')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require('../sharedcode/helpers/archive.js')
 const { createStatistics } = require('../sharedcode/helpers/statistics.js')
@@ -36,7 +36,7 @@ module.exports = async function (context, req) {
       logger.info('No jobs to handle found, exit')
       // await alertTeams([], 'completed', [] , 'job', context.executionContext.functionName)
       // await alertTeams({}, 'completed', {}, 'This job is done', 'et endpoint') Dette er ikke teams webhooken glad i
-      return await azfHandleResponse('No jobs found', context, req)
+      return response('No jobs found')
     }
 
     const taskArr = []
@@ -517,9 +517,10 @@ module.exports = async function (context, req) {
         }
       }
     }
-    return await azfHandleResponse(taskArr, context, req)
+
+    return response(taskArr)
   } catch (error) {
     logger.errorException(error, 'Something went really wrong')
-    return await azfHandleError(error, context, req)
+    return response('Something went really wrong', 400)
   }
 }
