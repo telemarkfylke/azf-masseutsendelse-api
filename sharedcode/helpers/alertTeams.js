@@ -1,5 +1,4 @@
 const { MS } = require('../../config')
-const axios = require('axios').default
 
 const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoint) => {
   if (!color) throw new Error('Color must be provided')
@@ -21,7 +20,7 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
         contentType: 'application/vnd.microsoft.card.adaptive',
         contentUrl: null,
         content: {
-          $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+          $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
           type: 'AdaptiveCard',
           version: '1.5',
           msteams: { width: 'full' },
@@ -98,7 +97,16 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
   //   }]
   // }
   const headers = { contentType: 'application/vnd.microsoft.teams.card.o365connector' }
-  await axios.post(MS.TEAMS_WEBHOOK_URL, teamsMsg, { headers })
+  const result = await fetch(MS.TEAMS_WEBHOOK_URL, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(teamsMsg)
+  })
+  
+  if (!result.ok) {
+    // TODO: log error with loglady
+    throw new Error(`Failed to send Teams alert: ${result.status} ${result.statusText}`)
+  }
 }
 
 module.exports = {

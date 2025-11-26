@@ -1,8 +1,15 @@
 const { verify } = require('azure-ad-verify-token')
 const HTTPError = require('../../vtfk-errors/httperror')
 const { AZUREAD_TOKEN_CONFIG, MS, GRAPH } = require('../../../config')
-const { default: axios } = require('axios')
 const getAccessToken = require('../../helpers/get-entraid-token')
+
+const getEntraToken = async () => {
+  try {
+    return await getAccessToken(GRAPH.GRAPH_SCOPE)
+  } catch (error) {
+    throw new HTTPError(401, 'Not able to contact graph for token')
+  }
+}
 
 /**
  *
@@ -34,19 +41,25 @@ module.exports = async (authHeader) => {
   if (!validatedToken.roles || validatedToken.roles.length === 0) throw new HTTPError(401, 'No roles could be found in authentication token')
 
   // Grab department with graph
-  try {
-    const accessToken = await getAccessToken(GRAPH.GRAPH_SCOPE)
-    try {
-      const res = await axios.get(`${GRAPH.GRAPH_URL}/users/${validatedToken.upn}?$select=department`, { headers: { Authorization: `Bearer ${accessToken}` } })
-      validatedToken.department = res.data?.department
-    } catch (error) {
-      throw new HTTPError(401, 'Not able to contact graph')
+  const accessToken = await getEntraToken()
+  const response = await fetch(`${GRAPH.GRAPH_URL}/users/${validatedToken.upn}?$select=department`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`
     }
-  } catch (error) {
+  })
+
+  if (!response.ok) {
+    // TODO: log error with loglady
     throw new HTTPError(401, 'Not able to contact graph')
   }
 
-  if (!validatedToken.department) throw new HTTPError(401, 'Could not find the users company department in the authentication token')
+  const data = await response.json()
+  validatedToken.department = data?.department
+
+  if (!validatedToken.department) {
+    throw new HTTPError(401, 'Could not find the users company department in the authentication token')
+  }
 
   // If allowed groups/roles
   if (MS.AZUREAD_ALLOWEDGROUPS) {

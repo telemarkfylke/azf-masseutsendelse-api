@@ -11,20 +11,35 @@ const azuread = require('./lib/azuread')
  * @returns
  */
 async function auth (req) {
-  const requestor = {}
-  if (req.headers.authorization) {
-    const token = await azuread(req.headers.authorization)
-    if (token && token.name) requestor.name = token.name
-    if (token && token.oid) requestor.id = token.oid
-    // Department is fetched with graph, not from access or id token from auth process.
-    if (token && token.department) requestor.department = token.department
-    if (token && token.upn) requestor.email = token.upn
-  } else {
-    requestor.name = 'timetrigger'
-    requestor.id = 'timetrigger'
-    requestor.department = 'timetrigger'
-    requestor.email = 'timetrigger@telemarkfylke.no'
+  if (!req.headers.authorization) {
+    return {
+      name: 'timetrigger',
+      id: 'timetrigger',
+      department: 'timetrigger',
+      email: 'timetrigger@telemarkfylke.no'
+    }
   }
+
+  const token = await azuread(req.headers.authorization)
+  if (!token) {
+    return {}
+  }
+
+  const requestor = {}
+  if (token.name) {
+    requestor.name = token.name
+  }
+  if (token.oid) {
+    requestor.id = token.oid
+  }
+  // Department is fetched with graph, not from access or id token from auth process.
+  if (token.department) {
+    requestor.department = token.department
+  }
+  if (token.upn) {
+    requestor.email = token.upn
+  }
+
   return requestor
 }
 
