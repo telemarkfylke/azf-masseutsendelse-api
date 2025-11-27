@@ -12,7 +12,7 @@ module.exports = async (_context, req) => {
 		await getDb()
 
 		// Find all dispatches
-		let dispatches = []
+		let dispatches
 		if (req.query?.full === true || req.query?.full === "true") dispatches = await Dispatches.find({})
 		else dispatches = await Dispatches.find({}).select("-owners -excludedOwners -matrikkelUnitsWithoutOwners")
 

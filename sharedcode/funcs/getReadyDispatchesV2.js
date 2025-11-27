@@ -7,7 +7,7 @@ const Dispatches = require("../models/dispatches.js")
 const Jobs = require("../models/jobs")
 const { response } = require("../response/response-handler")
 const HTTPError = require("../vtfk-errors/httperror")
-const { PDFGENERATOR, MISC } = require("../../config")
+const { PDF_GENERATOR, MISC } = require("../../config")
 
 const generatePdfFromTemplate = async (dispatch) => {
 	const data = dispatch.template.data || {}
@@ -32,10 +32,10 @@ const generatePdfFromTemplate = async (dispatch) => {
 	// Generate PDF from template
 	const legalFilename = dispatch.title.replace(/[/\\?%*:|"<>;¤]/g, "")
 	logger.info("Making the request to the PDF api")
-	const response = await fetch(PDFGENERATOR.PDFGENERATOR_ENDPOINT, {
+	const response = await fetch(PDF_GENERATOR.PDFGENERATOR_ENDPOINT, {
 		method: "POST",
 		headers: {
-			"x-functions-key": PDFGENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
+			"x-functions-key": PDF_GENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
 		},
 		body: JSON.stringify(pdfRequestBody)
 	})

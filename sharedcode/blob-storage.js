@@ -6,7 +6,7 @@ const getBlobContainer = () => {
 	return blobServiceClient.getContainerClient(process.env.STORAGE_ACCOUNT_BLOB_NAME)
 }
 
-async function streamToBuffer(readableStream) {
+/*async function streamToBuffer(readableStream) {
 	return new Promise((resolve, reject) => {
 		const chunks = []
 		readableStream.on("data", (data) => {
@@ -17,7 +17,7 @@ async function streamToBuffer(readableStream) {
 		})
 		readableStream.on("error", reject)
 	})
-}
+}*/
 
 // Upload content to blob storage
 const uploadBlob = async (options) => {
@@ -31,7 +31,7 @@ const uploadBlob = async (options) => {
 }
 
 // Download blob from blob storage
-async function downloadBlob(options) {
+/*async function downloadBlob(options) {
 	if (!options.dispatchId) throw new Error("The dispatchId must be provided for downloading files")
 	const blobName = `${options.dispatchId}/${options.name}`
 	const containerClient = getBlobContainer()
@@ -56,10 +56,10 @@ async function deleteBlob(options) {
 
 	const blobClient = containerClient.getBlockBlobClient(blobName)
 	await blobClient.delete()
-}
+}*/
 
 module.exports = {
-	uploadBlob,
+	uploadBlob /*,
 	downloadBlob,
-	deleteBlob
+	deleteBlob*/
 }

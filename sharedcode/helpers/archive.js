@@ -106,7 +106,7 @@ const createCaseDocument = async (method, title, caseNumber, date, contacts, att
 			responsiblePersonEmail
 		}
 	}
-	logger.info("Creating the casedocument")
+	logger.info("Creating the case document")
 	let data = await callArchive(method, payload)
 
 	// Handle and return the response

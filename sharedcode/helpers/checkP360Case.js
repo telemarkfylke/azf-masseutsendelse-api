@@ -7,13 +7,13 @@ const { callArchive } = require("./call-archive")
 
 /**
  * Attempt to get a case from P360
- * @param {string} casenumber The P360 casenumber to check if exists
+ * @param {string} caseNumber The P360 case number to check if exists
  */
-module.exports.getCase = async function getCase(casenumber) {
+module.exports.getCase = async function getCase(caseNumber) {
 	// Input validation
 	logger.info("Validating input")
-	if (!casenumber) throw new Error("Archive casenumber cannot be empty")
-	if (!ARCHIVE.ARCHIVE_ENDPOINT) throw new Error("Endpoint environment variable cannot be empty, checkcase")
+	if (!caseNumber) throw new Error("Archive case number cannot be empty")
+	if (!ARCHIVE.ARCHIVE_ENDPOINT) throw new Error("Endpoint environment variable cannot be empty, check case")
 	if (!ARCHIVE.ARCHIVE_SCOPE) throw new Error("Scope environment variable cannot be empty")
 
 	// Build the payload
@@ -21,13 +21,13 @@ module.exports.getCase = async function getCase(casenumber) {
 		service: "CaseService",
 		method: "GetCases",
 		parameter: {
-			CaseNumber: casenumber
+			CaseNumber: caseNumber
 		},
 		options: {
 			onlyOpenCases: true
 		}
 	}
-	logger.info("Checking if the casenumber exist and is open")
+	logger.info("Checking if the case number exist and is open")
 	let data = await callArchive("archive", payload)
 
 	// Handle and return the response
@@ -35,7 +35,7 @@ module.exports.getCase = async function getCase(casenumber) {
 	if (!data || !data) return undefined
 	if (Array.isArray(data)) {
 		if (data.length === 0) return undefined
-		if (data.length > 1) throw new Error(`The casenumber ${casenumber} matched ${data.length} it must only match one`)
+		if (data.length > 1) throw new Error(`The case number ${caseNumber} matched ${data.length} it must only match one`)
 		data = data[0]
 	}
 	return data

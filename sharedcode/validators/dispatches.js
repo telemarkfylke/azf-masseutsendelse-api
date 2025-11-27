@@ -17,8 +17,8 @@ module.exports.validate = async (dispatch, _req) => {
 	if (!dispatch.template && dispatch.attachments && Array.isArray(dispatch.attachments) && dispatch.attachments.length <= 0)
 		throw new HTTPError(400, "Attachments cannot be empty when there is no template")
 
-	// Validate that the provided archivenumber exists in P360
-	if (!dispatch.archivenumber) throw new HTTPError(400, "No archivenumber has been provided")
+	// Validate that the provided archive number exists in P360
+	if (!dispatch.archivenumber) throw new HTTPError(400, "No archive number has been provided")
 	if (dispatch.archivenumber !== dispatch.validatedArchivenumber) {
 		try {
 			const p360Case = await getCase(dispatch.archivenumber)

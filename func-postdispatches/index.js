@@ -89,7 +89,7 @@ module.exports = async (_context, req) => {
 				}
 
 				if (file.name?.includes("/")) {
-					return new HTTPError(400, 'Illigal character in filname, "/" is not allowed.').toHTTPResponse()
+					return new HTTPError(400, 'Illegal character in filename, "/" is not allowed.').toHTTPResponse()
 				}
 				if (!file.name) file.name = file._id
 

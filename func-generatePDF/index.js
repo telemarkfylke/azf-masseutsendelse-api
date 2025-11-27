@@ -1,5 +1,5 @@
 const { logger } = require("@vestfoldfylke/loglady")
-const { PDFGENERATOR } = require("../config")
+const { PDF_GENERATOR } = require("../config")
 const { response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
@@ -33,11 +33,11 @@ module.exports = async (context, _req) => {
 
 	// Define headers
 	const headers = {
-		"x-functions-key": PDFGENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
+		"x-functions-key": PDF_GENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
 	}
 
 	// Make the request
-	const responseRequest = await fetch(PDFGENERATOR.PDFGENERATOR_ENDPOINT, {
+	const responseRequest = await fetch(PDF_GENERATOR.PDFGENERATOR_ENDPOINT, {
 		method: "POST",
 		headers,
 		body: JSON.stringify(requestData)

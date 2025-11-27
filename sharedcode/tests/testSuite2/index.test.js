@@ -4,11 +4,11 @@ const getTemplateById = require("../../../func-gettemplatesbyid/index")
 const getTemplates = require("../../../func-gettemplates/index")
 const editTemplate = require("../../../func-puttemplates/index")
 const postDispatches = require("../../../func-postdispatches/index")
-const getDispachesById = require("../../../func-getdispatchesbyid/index")
-// const getDispaches = require('../../../func-getdispatches/index')
+const getDispatchesById = require("../../../func-getdispatchesbyid/index")
+// const getDispatches = require('../../../func-getdispatches/index')
 const editDispatches = require("../../../func-editdispatches/index")
 // const getReadyDispatches = require('../../../func-getreadydispatches/index')
-const complteDispatch = require("../../../func-completedispatch/index")
+const completeDispatch = require("../../../func-completedispatch/index")
 const getMatrikkel = require("../../../func-getmatrikkel/index")
 const getBlob = require("../../../func-getblob")
 
@@ -17,7 +17,7 @@ const validTemplate = require("../testCases/validCases/post_template")
 const validDispatchBoth = require("../testCases/validCases/post_dispatch_both")
 const validDispatchAttachments = require("../testCases/validCases/post_dispatch_attachments")
 // const validDispatchTemplate = require('../testCases/validCases/post_dispatch_template')
-// const validDispatchEdit = require('../testCases/validCases/edit_disaptch')
+// const validDispatchEdit = require('../testCases/validCases/edit_dispatch')
 // const validDispatchEditInprogress = require('../testCases/validCases/edit_dispatch_inprogress')
 const validDispatchEditApproved = require("../testCases/validCases/edit_dispatch_approved")
 // const validDispatchEditTimestamp = require('../testCases/validCases/edit_dispatch_approvedTimestamp')
@@ -112,12 +112,12 @@ describe("Endpoint testing", () => {
 	let idTemplate = ""
 	let _timestampTemplate = ""
 	//const idDispatch = ""
-	//const timestampDispach = ""
+	//const timestampDispatch = ""
 	const idDispatchOnlyTemplate = ""
 	//const idDispatchAttachments = ""
 
 	// Valid cases
-	describe("Testing validcases", () => {
+	describe("Testing valid cases", () => {
 		// Template tests
 		test("Should post a template to the db", async () => {
 			const post = await postTemplate(context, validTemplate)
@@ -235,7 +235,7 @@ describe("Endpoint testing", () => {
 		//     id: idDispatch
 		//   }
 
-		//   const get = await getDispachesById(contextModified, apikeyHeader)
+		//   const get = await getDispatchesById(contextModified, apikeyHeader)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
@@ -247,7 +247,7 @@ describe("Endpoint testing", () => {
 		// })
 
 		// test('Should get all the dispatches from the db', async () => {
-		//   const get = await getDispaches(context, apikeyHeader)
+		//   const get = await getDispatches(context, apikeyHeader)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
@@ -306,7 +306,7 @@ describe("Endpoint testing", () => {
 		//   expect(edit.body.approvedByEmail).toEqual('timetrigger@telemarkfylke.no' || 'timetrigger@vestfoldfylke.no')
 		// })
 
-		// test('Should return empty body since theres no approved dispatches with the correct time', async () => {
+		// test('Should return empty body since there\'s no approved dispatches with the correct time', async () => {
 		//   const get = await getReadyDispatches(context, apikeyHeader)
 
 		//   expect(get).resolves
@@ -327,14 +327,14 @@ describe("Endpoint testing", () => {
 		//   expect(edit).toBeTruthy()
 		//   expect(edit.status).toEqual(200)
 		//   expect(edit.body.status).toEqual('approved')
-		//   // Denne testen fungerer lokalt, ikke på github pga tidsoner osv.
+		//   // Denne testen fungerer lokalt, ikke på github pga tidssoner osv.
 		//   // expect(edit.body.approvedTimestamp.toString()).toMatch('Thu Feb 03 2022 10:52:23 GMT+0100 (sentraleuropeisk normaltid)')
 		// })
 
 		// test('Should return all dispatches with the correct approvedTimestamp', async () => {
 		//   const get = await getReadyDispatches(context, apikeyHeader)
 
-		//   timestampDispach = get.body[0].e18Job.tasks[3].data.parameter.date
+		//   timestampDispatch = get.body[0].e18Job.tasks[3].data.parameter.date
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
@@ -400,7 +400,7 @@ describe("Endpoint testing", () => {
 		//               ssn: '13374201337'
 		//             }
 		//           ],
-		//           date: timestampDispach,
+		//           date: timestampDispatch,
 		//           paragraph: '',
 		//           responsiblePersonEmail: 'jest.test@vtfk.no',
 		//           title: 'Parallel test'
@@ -440,7 +440,7 @@ describe("Endpoint testing", () => {
 		// })
 
 		// test('Should complete dispatch object with status approved', async () => {
-		//   const complete = await complteDispatch(context, validDispatchEditApproved)
+		//   const complete = await completeDispatch(context, validDispatchEditApproved)
 		//   console.log(complete)
 		//   expect(complete).resolves
 		//   expect(complete).toBeTruthy()
@@ -463,7 +463,7 @@ describe("Endpoint testing", () => {
 		//   expect(get.body.msg).toEqual('Matrikkel api successfully connected')
 		// })
 
-		test("Should call the getblob endpoint correctly", async () => {
+		test("Should call the getBlob endpoint correctly", async () => {
 			const contextModified = context
 			contextModified.bindingData = {
 				id: 1,
@@ -542,7 +542,7 @@ describe("Endpoint testing", () => {
 			expect(post.status).toEqual(500)
 		})
 
-		test("Should reject posting a dispatch with attachments becasue a file got an illegal character in the filename", async () => {
+		test("Should reject posting a dispatch with attachments because a file got an illegal character in the filename", async () => {
 			const post = await postDispatches(context, invalidDispatchIllegalCharacter)
 
 			expect(post).toBeInstanceOf(Object)
@@ -557,7 +557,7 @@ describe("Endpoint testing", () => {
 				id: ""
 			}
 
-			const get = await getDispachesById(contextModified, apikeyHeader)
+			const get = await getDispatchesById(contextModified, apikeyHeader)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.body).toBeDefined()
@@ -570,7 +570,7 @@ describe("Endpoint testing", () => {
 				id: "61f9502c1a6e890eec90d2b1"
 			}
 
-			const get = await getDispachesById(contextModified, apikeyHeader)
+			const get = await getDispatchesById(contextModified, apikeyHeader)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.body).toBeDefined()
@@ -657,7 +657,7 @@ describe("Endpoint testing", () => {
 				id: ""
 			}
 
-			const complete = await complteDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
 
 			expect(complete).toBeInstanceOf(Object)
 			expect(complete.body).toBeDefined()
@@ -671,20 +671,20 @@ describe("Endpoint testing", () => {
 				id: "61f9502c1a6e890eec90d2b1"
 			}
 
-			const complete = await complteDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
 
 			expect(complete).toBeInstanceOf(Object)
 			expect(complete.body).toBeDefined()
 			expect(complete.status).toEqual(404)
 		})
 
-		test("Should reject completing a dispatch since the dispach status is not set to approved", async () => {
+		test("Should reject completing a dispatch since the dispatch status is not set to approved", async () => {
 			const contextModified = context
 			contextModified.bindingData = {
 				id: idDispatchOnlyTemplate
 			}
 
-			const complete = await complteDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
 
 			expect(complete).toBeInstanceOf(Object)
 			expect(complete.body).toBeDefined()

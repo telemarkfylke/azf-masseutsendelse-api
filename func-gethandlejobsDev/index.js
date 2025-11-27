@@ -40,7 +40,7 @@ module.exports = async (context, req) => {
 			// error: any, color: any, failedTask: any, completedJob: any, jobId: any, endpoint: any
 			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'failed task' , [], undefined, context.executionContext.functionName)
 			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'funcgetandlejobsDev failed', [], 'no id found', context.executionContext.functionName)
-			// await alertTeams({}, 'completed', {}, 'This job is done', 'et endpoint') Dette er ikke teams webhooken glad i
+			// await alertTeams({}, 'completed', {}, 'This job is done', 'et endpoint') Dette er ikke teams webhook glad i
 			return response("No jobs found")
 		}
 
@@ -85,7 +85,7 @@ module.exports = async (context, req) => {
 					} catch (error) {
 						await alertTeams(JSON.stringify(error), "error", "pushing failed job to mongodb", [], jobId, context.executionContext.functionName)
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						throw new Error(JSON.stringify(error), "error", "pushing failed job to mongodb", jobId, context.executionContext.functionName)
+						return errorResponse(error, "Failed pushing the failed job to mongodb", 400)
 					}
 				}
 				// Find the job
@@ -212,7 +212,7 @@ module.exports = async (context, req) => {
 					}
 					// Array of dispatches to be issued (always one, but in an array)
 					const issueDispatchCopy = doc.tasks.issueDispatch
-					// Array of attachments that needs the documentNumber retunren from the createCaseDocumnet Job.
+					// Array of attachments that needs the documentNumber returned from the createCaseDocument Job.
 					const uploadAttachmentsCopy = doc.tasks.uploadAttachments
 					// Define the retry prop if not found. If found assume we already tried to finish the job but failed and add 1 to the count.
 					if (currentCase?.retry) {
@@ -262,7 +262,7 @@ module.exports = async (context, req) => {
 							// Just for testing
 							// const caseDocSampleReturn = { Recno: 212144, DocumentNumber: '23/00024-10' }
 
-							// If no attachments we need to add the documentnumber to the issueDispatch job
+							// If no attachments we need to add the document number to the issueDispatch job
 							for (const dispatch of issueDispatchCopy) {
 								dispatch.dataMapping = caseDoc.DocumentNumber
 							}
@@ -298,7 +298,7 @@ module.exports = async (context, req) => {
 						logger.error("Current Job: {JobToHandle}, no job found.", jobToHandle)
 						throw new Error("Document not found")
 					}
-					// Array of attachments that needs the documentNumber retunren from the createCaseDocumnet Job.
+					// Array of attachments that needs the documentNumber returned from the createCaseDocument Job.
 					const issueDispatchCopy = doc.tasks.issueDispatch
 					const attachments = []
 					let currentTaskIndex

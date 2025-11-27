@@ -85,7 +85,7 @@ module.exports = {
 		owners: [
 			{
 				_type: "FysiskPerson",
-				_namespace: "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
+				_namespace: "https://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
 				id: "1337",
 				oppdateringsdato: "2020-06-15T22:40:57.525000000+02:00",
 				versjonId: "3",
@@ -150,7 +150,7 @@ module.exports = {
 			},
 			{
 				_type: "FysiskPerson",
-				_namespace: "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
+				_namespace: "https://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
 				id: "1337",
 				oppdateringsdato: "2020-06-15T22:40:57.525000000+02:00",
 				versjonId: "3",
@@ -215,7 +215,7 @@ module.exports = {
 			},
 			{
 				_type: "JuridiskPerson",
-				_namespace: "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
+				_namespace: "https://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/person",
 				id: "1337",
 				oppdateringsdato: "2020-06-15T22:40:57.525000000+02:00",
 				versjonId: "3",
