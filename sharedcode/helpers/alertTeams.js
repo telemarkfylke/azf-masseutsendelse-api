@@ -86,7 +86,7 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
   //         value: color === 'a80c0c' ? failedTask : completedJob
   //       },
   //       {
-  //         name: 'JobId (mongoDB ObjectID)',
+  //         name: 'JobId (mongoDB ObjectId)',
   //         value: jobId
   //       },
   //       {

@@ -1,7 +1,7 @@
 const { logger } = require("@vestfoldfylke/loglady");
 const blobClient = require('@vtfk/azure-blob-client')
 const utils = require('@vtfk/utilities')
-const { ObjectID } = require('mongodb')
+const { ObjectId } = require('mongodb')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
 const { errorResponse, response } = require('../sharedcode/response/response-handler')
@@ -13,13 +13,13 @@ module.exports = async function (context, req) {
   try {
     // Strip away som fields that should not bed set by the request.
     req.body = utils.removeKeys(req.body, ['validatedArchivenumber', 'createdTimestamp', 'createdBy', 'createdById', 'modifiedTimestamp', 'modifiedBy', 'modifiedById'])
-    delete req.body._id // _id must be removed by it self to not remove template _id and other _ids as well
+    delete req.body._id // _id must be removed by itself to not remove template _id and other _ids as well
 
     // Authentication / Authorization
     const requestor = await require('../sharedcode/auth/auth').auth(req)
 
     // Set values
-    req.body._id = new ObjectID()
+    req.body._id = new ObjectId()
     req.body.status = 'notapproved'
 
     req.body.createdBy = requestor.name

@@ -8,11 +8,8 @@ let mongod
 module.exports.connect = async () => {
   mongod = await MongoMemoryServer.create()
   const uri = mongod.getUri()
-  const mongooseOpts = {
-    useNewUrlParser: true
-  }
   process.env.URI = uri
-  await mongoose.connect(uri, mongooseOpts)
+  await mongoose.connect(uri)
 }
 /**
  * Drop database, close the connection and stop mongod.
