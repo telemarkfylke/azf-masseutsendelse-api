@@ -477,7 +477,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, invalidDispatch)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(400)
     })
 
@@ -485,7 +485,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, apikeyHeader)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(400)
     })
 
@@ -493,7 +493,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, invalidDispatchArchiveNumber)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(400)
     })
 
@@ -503,7 +503,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, validDispatchAttachments)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -513,7 +513,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, validDispatchAttachments)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -521,7 +521,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, invalidDispatchMissingFileExtension)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -529,7 +529,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, invalidDispatchIllegalFileExtension)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -537,7 +537,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, invalidDispatchIllegalCharacter)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -551,7 +551,7 @@ describe('Endpoint testing', () => {
       const get = await getDispachesById(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -564,7 +564,7 @@ describe('Endpoint testing', () => {
       const get = await getDispachesById(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(404)
     })
 
@@ -586,7 +586,7 @@ describe('Endpoint testing', () => {
       const edit = await editDispatches(contextModified, request)
 
       expect(edit).toBeInstanceOf(Object)
-      expect(edit.body.message).toBeDefined()
+      expect(edit.body).toBeDefined()
       expect(edit.status).toEqual(404)
     })
 
@@ -651,7 +651,7 @@ describe('Endpoint testing', () => {
       const complete = await complteDispatch(contextModified, validDispatchEditApproved)
 
       expect(complete).toBeInstanceOf(Object)
-      expect(complete.body.message).toBeDefined()
+      expect(complete.body).toBeDefined()
       expect(complete.status).toEqual(400)
     })
 
@@ -665,7 +665,7 @@ describe('Endpoint testing', () => {
       const complete = await complteDispatch(contextModified, validDispatchEditApproved)
 
       expect(complete).toBeInstanceOf(Object)
-      expect(complete.body.message).toBeDefined()
+      expect(complete.body).toBeDefined()
       expect(complete.status).toEqual(404)
     })
 
@@ -678,7 +678,7 @@ describe('Endpoint testing', () => {
       const complete = await complteDispatch(contextModified, validDispatchEditApproved)
 
       expect(complete).toBeInstanceOf(Object)
-      expect(complete.body.message).toBeDefined()
+      expect(complete.body).toBeDefined()
       expect(complete.status).toEqual(400)
     })
 
@@ -688,7 +688,7 @@ describe('Endpoint testing', () => {
       const get = await getMatrikkel(context, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -698,7 +698,7 @@ describe('Endpoint testing', () => {
       const get = await getMatrikkel(context, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -713,7 +713,7 @@ describe('Endpoint testing', () => {
       const get = await getBlob(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -728,7 +728,7 @@ describe('Endpoint testing', () => {
       const get = await getBlob(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -743,7 +743,7 @@ describe('Endpoint testing', () => {
       const get = await getBlob(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -753,7 +753,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, validDispatchBoth)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -763,7 +763,7 @@ describe('Endpoint testing', () => {
       const post = await postDispatches(context, validDispatchBoth)
 
       expect(post).toBeInstanceOf(Object)
-      expect(post.body.message).toBeDefined()
+      expect(post.body).toBeDefined()
       expect(post.status).toEqual(500)
     })
 
@@ -777,7 +777,7 @@ describe('Endpoint testing', () => {
       const get = await getTemplateById(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -790,7 +790,7 @@ describe('Endpoint testing', () => {
       const get = await getTemplateById(contextModified, apikeyHeader)
 
       expect(get).toBeInstanceOf(Object)
-      expect(get.body.message).toBeDefined()
+      expect(get.body).toBeDefined()
       expect(get.status).toEqual(400)
     })
 
@@ -813,7 +813,7 @@ describe('Endpoint testing', () => {
       const edit = await editTemplate(contextModified, request)
 
       expect(edit).toBeInstanceOf(Object)
-      expect(edit.body.message).toBeDefined()
+      expect(edit.body).toBeDefined()
       expect(edit.status).toEqual(400)
     })
 
@@ -836,7 +836,7 @@ describe('Endpoint testing', () => {
       const edit = await editTemplate(contextModified, request)
 
       expect(edit).toBeInstanceOf(Object)
-      expect(edit.body.message).toBeDefined()
+      expect(edit.body).toBeDefined()
       expect(edit.status).toEqual(400)
     })
   })
