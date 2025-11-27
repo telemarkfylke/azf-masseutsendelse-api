@@ -3,7 +3,7 @@ const Jobs = require('../sharedcode/models/jobs.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
 
 const { logger } = require('@vestfoldfylke/loglady')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require('../sharedcode/helpers/archive.js')
 const { createStatistics } = require('../sharedcode/helpers/statistics.js')
@@ -521,6 +521,6 @@ module.exports = async function (context, req) {
     return response(taskArr)
   } catch (error) {
     logger.errorException(error, 'Something went really wrong')
-    return response('Something went really wrong', 400)
+    return errorResponse(error, 'Something went really wrong', 400)
   }
 }

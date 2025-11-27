@@ -4,7 +4,7 @@ const utils = require('@vtfk/utilities')
 const { ObjectID } = require('mongodb')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror.js')
 const validate = require('../sharedcode/validators/dispatches').validate
 const { STORAGE } = require('../config')
@@ -100,6 +100,6 @@ module.exports = async function (context, req) {
     return response(results)
   } catch (err) {
     logger.errorException(err, 'Failed to post dispatches')
-    return response('Failed to post dispatches', 400)
+    return errorResponse(err, 'Failed to post dispatches', 400)
   }
 }

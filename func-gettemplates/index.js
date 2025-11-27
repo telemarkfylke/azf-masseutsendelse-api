@@ -1,7 +1,7 @@
 const { logger } = require("@vestfoldfylke/loglady");
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const Templates = require('../sharedcode/models/templates.js')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
@@ -22,6 +22,6 @@ module.exports = async function (context, req) {
     return response(templates)
   } catch (err) {
     logger.errorException(err, 'Failed to get templates')
-    return response('Failed to get templates', 400)
+    return errorResponse(err, 'Failed to get templates', 400)
   }
 }

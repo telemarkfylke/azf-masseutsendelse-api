@@ -3,7 +3,7 @@ const utils = require('@vtfk/utilities')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const Templates = require('../sharedcode/models/templates.js')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   try {
@@ -44,6 +44,6 @@ module.exports = async function (context, req) {
     return response(updatedTemplate)
   } catch (err) {
     logger.errorException(err, 'Failed to put templates')
-    return response('Failed to put templates', 400)
+    return errorResponse(err, 'Failed to put templates', 400)
   }
 }

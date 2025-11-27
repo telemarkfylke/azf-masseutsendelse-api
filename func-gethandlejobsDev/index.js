@@ -7,7 +7,7 @@ const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const { alertTeams } = require('../sharedcode/helpers/alertTeams.js')
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require('../sharedcode/helpers/archive.js')
 const { createStatistics } = require('../sharedcode/helpers/statistics.js')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 
 module.exports = async function (context, req) {
   let jobId
@@ -526,6 +526,6 @@ module.exports = async function (context, req) {
     return response(taskArr)
   } catch (error) {
     logger.errorException(error, 'The job with the JobId: {JobId} failed', jobId)
-    return response(`The job with the JobId ${jobId} failed`, 400)
+    return errorResponse(error, `The job with the JobId ${jobId} failed`, 400)
   }
 }

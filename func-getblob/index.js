@@ -1,6 +1,6 @@
 const { logger } = require("@vestfoldfylke/loglady");
 const blobClient = require('@vtfk/azure-blob-client')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
 module.exports = async function (context, req) {
@@ -34,6 +34,6 @@ module.exports = async function (context, req) {
     return response(context.bindingData.file)
   } catch (err) {
     logger.errorException(err, 'Failed to get blob')
-    return response('Failed to get blob', 400)
+    return errorResponse(err, 'Failed to get blob', 400)
   }
 }

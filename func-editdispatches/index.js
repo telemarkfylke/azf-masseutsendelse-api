@@ -3,7 +3,7 @@ const blobClient = require('@vtfk/azure-blob-client')
 const utils = require('@vtfk/utilities')
 const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
 const Dispatches = require('../sharedcode/models/dispatches.js')
-const { response } = require('../sharedcode/response/response-handler')
+const { errorResponse, response } = require('../sharedcode/response/response-handler')
 const validate = require('../sharedcode/validators/dispatches').validate
 const HTTPError = require('../sharedcode/vtfk-errors/httperror')
 
@@ -116,6 +116,6 @@ module.exports = async function (context, req) {
     return response(updatedDispatch)
   } catch (err) {
     logger.errorException(err, 'Failed to put edit dispatches')
-    return response('Failed to put edit dispatches', 400)
+    return errorResponse(err, 'Failed to put edit dispatches', 400)
   }
 }
