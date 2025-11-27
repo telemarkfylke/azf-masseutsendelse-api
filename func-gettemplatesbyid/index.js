@@ -13,7 +13,7 @@ module.exports = async function (context, req) {
     const id = context.bindingData.id
 
     if (!id) {
-      return new HTTPError('400', 'No template id was provided').toHTTPResponse()
+      return new HTTPError(400, 'No template id was provided').toHTTPResponse()
     }
 
     // Await the database
@@ -22,7 +22,7 @@ module.exports = async function (context, req) {
     // Find Template by ID
     const template = await Templates.findById(id)
     if (!template) {
-      return new HTTPError('400', `Template with id ${id} could no be found`).toHTTPResponse()
+      return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
     }
 
     // Return the template object
