@@ -1,20 +1,18 @@
 {
-  "disabled": false,
-  "bindings": [
-    {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
-      "direction": "in",
-      "name": "req",
-      "methods": [ 
-        "get" 
-      ],
-      "route": "dispatches"
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
-    }
-  ]
+	"disabled": false,
+	"bindings": [
+		{
+			"authLevel": "anonymous",
+			"type": "httpTrigger",
+			"direction": "in",
+			"name": "req",
+			"methods": ["get"],
+			"route": "dispatches"
+		},
+		{
+			"type": "http",
+			"direction": "out",
+			"name": "$return"
+		}
+	]
 }

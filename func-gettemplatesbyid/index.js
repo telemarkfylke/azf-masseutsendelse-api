@@ -1,36 +1,36 @@
-const { logger } = require("@vestfoldfylke/loglady");
-const getDb = require('../sharedcode/connections/masseutsendelseDB.js')
-const Templates = require('../sharedcode/models/templates.js')
-const { errorResponse, response } = require('../sharedcode/response/response-handler')
-const HTTPError = require('../sharedcode/vtfk-errors/httperror')
+const { logger } = require("@vestfoldfylke/loglady")
+const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
+const Templates = require("../sharedcode/models/templates.js")
+const { errorResponse, response } = require("../sharedcode/response/response-handler")
+const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-module.exports = async function (context, req) {
-  try {
-    // Authentication / Authorization
-    await require('../sharedcode/auth/auth').auth(req)
+module.exports = async (context, req) => {
+	try {
+		// Authentication / Authorization
+		await require("../sharedcode/auth/auth").auth(req)
 
-    // Get ID from request
-    const id = context.bindingData.id
+		// Get ID from request
+		const id = context.bindingData.id
 
-    if (!id) {
-      return new HTTPError(400, 'No template id was provided').toHTTPResponse()
-    }
+		if (!id) {
+			return new HTTPError(400, "No template id was provided").toHTTPResponse()
+		}
 
-    // Await the database
-    await getDb()
+		// Await the database
+		await getDb()
 
-    // Find Template by ID
-    const template = await Templates.findById(id)
-    if (!template) {
-      return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
-    }
+		// Find Template by ID
+		const template = await Templates.findById(id)
+		if (!template) {
+			return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
+		}
 
-    // Return the template object
-    const templateById = await Templates.findById(id, req.body, { new: true })
+		// Return the template object
+		const templateById = await Templates.findById(id, req.body, { new: true })
 
-    return response(templateById)
-  } catch (err) {
-    logger.errorException(err, 'Failed to get templates by id')
-    return errorResponse(err, 'Failed to get template by id', 400)
-  }
+		return response(templateById)
+	} catch (err) {
+		logger.errorException(err, "Failed to get templates by id")
+		return errorResponse(err, "Failed to get template by id", 400)
+	}
 }
