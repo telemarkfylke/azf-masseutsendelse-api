@@ -1,3 +1,4 @@
+const { logger } = require("@vestfoldfylke/loglady");
 const mongoose = require("mongoose")
 const uri = process.env.MONGODB_CONNECTIONSTRING
 
@@ -9,6 +10,7 @@ module.exports = async () => {
 		})
 		Promise.resolve(client)
 	} catch (err) {
+		logger.errorException(err, "Failed to connect to masseutsendelse database")
 		Promise.reject(err)
 	}
 }

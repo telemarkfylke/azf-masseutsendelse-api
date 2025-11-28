@@ -158,7 +158,7 @@ module.exports = async (context, req) => {
 										logger.info("Handling the failed task, updating")
 										numbOfFailedTasks += 1
 										await alertTeams(JSON.stringify(error.response.data), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
-										logger.error("The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!", job, jobId, currentTaskIndex)
+										logger.errorException(error, "The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!", job, jobId, currentTaskIndex)
 										if (doc.tasks.syncRecipients[currentTaskIndex]?.retry) {
 											doc.tasks.syncRecipients[currentTaskIndex].retry += 1
 										}
@@ -171,9 +171,9 @@ module.exports = async (context, req) => {
 										const data = Object.assign({}, doc.tasks.syncRecipients[currentTaskIndex], errorObj)
 										// Update the correct object with status "failed" and with the data.
 										updatedTask.push(data)
-									} catch (error) {
-										logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-										await alertTeams(JSON.stringify(error), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+									} catch (innerError) {
+										logger.errorException(innerError, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
+										await alertTeams(JSON.stringify(innerError), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
 									}
 								}
 							} else if (task.status === "completed") {

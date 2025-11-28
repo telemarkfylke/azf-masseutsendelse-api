@@ -173,9 +173,9 @@ module.exports = async (context, _req) => {
 										const data = Object.assign({}, doc.tasks.syncRecipients[currentTaskIndex], errorObj)
 										// Update the correct object with status "failed" and with the data.
 										updatedTask.push(data)
-									} catch (error) {
-										logger.error("Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-										await alertTeams(JSON.stringify(error), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+									} catch (innerError) {
+										logger.errorException(innerError, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
+										await alertTeams(JSON.stringify(innerError), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
 									}
 								}
 							} else if (task.status === "completed") {
@@ -409,7 +409,7 @@ module.exports = async (context, _req) => {
 								new: true
 							})
 						}
-						logger.error("Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
+						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
 						await alertTeams(error?.response?.data ? JSON.stringify({ ...error.response.data }) : JSON.stringify(error), "error", "uploadAttachments", [], jobId, context.executionContext.functionName)
 					}
 				} else if (jobToHandle === "issueDispatch") {
