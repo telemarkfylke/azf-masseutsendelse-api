@@ -44,7 +44,7 @@ API used to by masseutsendelse-web to communicate with various systems and APIs.
 | ARCHIVE_APP_REG_CLIENT_SECRET         | Client secret for archive app reg                   | [Secret]                                                                                                         |
 | PAPERTRAIL_HOST                       | URL to the papertrail log                           | papertrail.example.com/v1/log                                                                                    |
 | PAPERTRAIL_TOKEN                      | Token to the papertrail log                         | TOKEN                                                                                                            |
-| TEAMS_WEBHOOK_URL                     | Webhook for teams alerts                            | [webhook]                                                                                                        |
+| TEAMS_ALERTS_WEBHOOK_URL              | Webhook for teams alerts                            | [webhook]                                                                                                        |
 | GRAPH_SCOPE                           | Graph scope                                         | https://graph.microsoft.com/.default                                                                             |
 | GRAPH_URL                             | Graph url                                           | https://graph.microsoft.com/v1.0                                                                                 |
 | APP_REG_TENANT_ID                     | Tenant id                                           | [TenantID]                                                                                                       |

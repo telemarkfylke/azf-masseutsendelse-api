@@ -94,7 +94,7 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
 	//   }]
 	// }
 	const headers = { contentType: "application/vnd.microsoft.teams.card.o365connector" }
-	const response = await fetch(MS.TEAMS_WEBHOOK_URL, {
+	const response = await fetch(MS.TEAMS_ALERTS_WEBHOOK_URL, {
 		method: "POST",
 		headers,
 		body: JSON.stringify(teamsMsg)
