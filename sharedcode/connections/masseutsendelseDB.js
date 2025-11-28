@@ -1,4 +1,4 @@
-const { logger } = require("@vestfoldfylke/loglady");
+const { logger } = require("@vestfoldfylke/loglady")
 const mongoose = require("mongoose")
 const uri = process.env.MONGODB_CONNECTIONSTRING
 

@@ -1,9 +1,10 @@
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const { getReadyDispatchesV2 } = require("../sharedcode/funcs/getReadyDispatchesV2.js")
 const { alertTeams } = require("../sharedcode/helpers/alertTeams.js")
 const { errorResponse } = require("../sharedcode/response/response-handler")
 
-module.exports = async (context, req) => {
+const getReadyDispatches = async (req, context) => {
 	try {
 		return await getReadyDispatchesV2(context, req)
 	} catch (err) {
@@ -12,3 +13,8 @@ module.exports = async (context, req) => {
 		return errorResponse(err, "Failed to get ready dispatches V2", 400)
 	}
 }
+
+app.timer("getReadyDispatches", {
+	schedule: "0 0 12 * * *", // Every day at 12:00 PM
+	handler: getReadyDispatches
+})

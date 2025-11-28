@@ -6,12 +6,15 @@
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
 		"start": "func start",
+		"test:jest": "jest",
 		"test": "npm run lint && jest"
 	},
 	"engines": {
 		"node": ">=18"
 	},
+	"main": "func*/index.js",
 	"dependencies": {
+		"@azure/functions": "^4.9.0",
 		"@azure/msal-node": "^2.6.4",
 		"@azure/storage-blob": "^12.29.1",
 		"@shelf/jest-mongodb": "^6.0.0",

@@ -1,16 +1,17 @@
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-module.exports = async (context, req) => {
+const getDispatchesById = async (req) => {
 	try {
 		// Authentication / Authorization
 		await require("../sharedcode/auth/auth").auth(req)
 
 		// Get ID from request
-		const id = context.bindingData.id
+		const id = req.params.id
 		if (!id) {
 			return new HTTPError(400, "No dispatch id was provided").toHTTPResponse()
 		}
@@ -25,7 +26,8 @@ module.exports = async (context, req) => {
 		}
 
 		// Return the dispatch object
-		const dispatchById = await Dispatches.findById(id, req.body, { new: true })
+		const requestBody = await req.json()
+		const dispatchById = await Dispatches.findById(id, requestBody, { new: true })
 
 		return response(dispatchById)
 	} catch (err) {
@@ -33,3 +35,12 @@ module.exports = async (context, req) => {
 		return errorResponse(err, "Failed to get dispatches by id", 400)
 	}
 }
+
+app.http("getDispatchesById", {
+	authLevel: "anonymous",
+	handler: getDispatchesById,
+	methods: ["GET"],
+	route: "dispatches/{id}"
+})
+
+module.exports = { getDispatchesById }

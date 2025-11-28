@@ -1,14 +1,17 @@
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const { PDF_GENERATOR } = require("../config")
 const { response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-module.exports = async (context, _req) => {
+const generatePDF = async (req) => {
 	// Get data from request and validate
-	const preview = context.bindingData.preview
+	const { preview, template, documentDefinitionId, data } = await req.json()
+	// TODO: Remove when tested
+	/*const preview = context.bindingData.preview
 	const template = context.bindingData.template
 	const documentDefinitionId = context.bindingData.documentDefinitionId
-	const data = context.bindingData.data
+	const data = context.bindingData.data*/
 
 	if (!preview) {
 		return new HTTPError(400, "Preview must provided").toHTTPResponse()
@@ -53,3 +56,10 @@ module.exports = async (context, _req) => {
 
 	return response(responseData)
 }
+
+app.http("generatePDF", {
+	authLevel: "anonymous",
+	handler: generatePDF,
+	methods: ["POST"],
+	route: "generatePDF"
+})

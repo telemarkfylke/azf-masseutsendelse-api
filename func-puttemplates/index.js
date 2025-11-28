@@ -1,3 +1,4 @@
+const { app } = require("@azure/functions")
 const { logger } = require("@vestfoldfylke/loglady")
 const utils = require("@vtfk/utilities")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
@@ -5,22 +6,23 @@ const Templates = require("../sharedcode/models/templates.js")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 
-module.exports = async (context, req) => {
+const putTemplates = async (req) => {
 	try {
 		// Authentication / Authorization
 		const requestor = await require("../sharedcode/auth/auth").auth(req)
 
 		// Strip away som fields that should not bed set by the request.
-		req.body = utils.removeKeys(req.body, ["createdTimestamp", "createdBy", "createdById", "modifiedTimestamp", "modifiedBy", "modifiedById"])
+		const rawRequestBody = await req.json()
+		const requestBody = utils.removeKeys(rawRequestBody, ["createdTimestamp", "createdBy", "createdById", "modifiedTimestamp", "modifiedBy", "modifiedById"])
 
 		// Update modified by
-		req.body.modifiedBy = requestor.name
-		req.body.modifiedById = requestor.id
-		req.body.modifiedTimestamp = new Date()
-		req.body.modifiedByDepartment = requestor.department
+		requestBody.modifiedBy = requestor.name
+		requestBody.modifiedById = requestor.id
+		requestBody.modifiedTimestamp = new Date()
+		requestBody.modifiedByDepartment = requestor.department
 
 		// Get ID from request
-		const id = context.bindingData.id
+		const id = req.params.id
 
 		if (!id) {
 			return new HTTPError(400, "No template id was provided").toHTTPResponse()
@@ -36,10 +38,10 @@ module.exports = async (context, req) => {
 		}
 
 		// Increment the version number
-		req.body.version = existingTemplate.version + 1
+		requestBody.version = existingTemplate.version + 1
 
 		// Update the template
-		const updatedTemplate = await Templates.findByIdAndUpdate(id, req.body, { new: true })
+		const updatedTemplate = await Templates.findByIdAndUpdate(id, requestBody, { new: true })
 
 		return response(updatedTemplate)
 	} catch (err) {
@@ -47,3 +49,12 @@ module.exports = async (context, req) => {
 		return errorResponse(err, "Failed to put templates", 400)
 	}
 }
+
+app.http("putTemplates", {
+	authLevel: "anonymous",
+	handler: putTemplates,
+	methods: ["PUT"],
+	route: "templates/{id}"
+})
+
+module.exports = { putTemplates }

@@ -18,16 +18,23 @@ const httpStatusCodeToDescription = (statusCode) => {
 /**
  * @param data
  * @param {number} statusCode
- * @returns {{status: number, statusDescription: string, headers: {"Content-Type": string}, body: *}}
+ * @returns {{status: number, headers: {"Content-Type": string}, body: *} | {status: number, headers: {"Content-Type": string}, jsonBody: *}}
  */
 const response = (data, statusCode = 200) => {
-	const contentType = typeof data === "object" ? "application/json; charset=utf-8" : "plain/text; charset=utf-8"
+	if (typeof data === "object" || Array.isArray(data)) {
+		return {
+			status: statusCode,
+			headers: {
+				"Content-Type": "application/json; charset=utf-8"
+			},
+			jsonBody: data
+		}
+	}
 
 	return {
 		status: statusCode,
-		statusDescription: httpStatusCodeToDescription(statusCode),
 		headers: {
-			"Content-Type": contentType
+			"Content-Type": "plain/text; charset=utf-8"
 		},
 		body: data
 	}
@@ -37,7 +44,7 @@ const response = (data, statusCode = 200) => {
  * @param {Error | HTTPError | string} error
  * @param {string} title - optional title for the error
  * @param {number} statusCode - optional status code, default is 200. If status is found in error, it will be used instead.
- * @returns {{status: any, headers: {"Content-Type": string}, statusDescription: any, body: {error: {statusName: any, statusCode: any, title: any, message: string, errors: any}, documentation: any | {}}}}
+ * @returns {{status: any, headers: {"Content-Type": string}, jsonBody: {error: {statusCode: any, statusName: any, message: string, title: any, errors: any}, documentation: any | {}}} | {status: any, headers: {"Content-Type": string}, jsonBody: {error: {statusCode: any, statusName: any, message: string, title: any, errors: any}}}}
  */
 const errorResponse = (error, title = "", statusCode = 200) => {
 	if (error instanceof HTTPError) {
@@ -48,17 +55,15 @@ const errorResponse = (error, title = "", statusCode = 200) => {
 		return new HTTPError(statusCode, error.message, title || error.name).toHTTPResponse()
 	}
 
-	const contentType = typeof error === "object" ? "application/json; charset=utf-8" : "plain/text; charset=utf-8"
 	return {
 		status: statusCode,
-		statusDescription: httpStatusCodeToDescription(statusCode),
 		headers: {
-			"Content-Type": contentType
+			"Content-Type": "application/json; charset=utf-8"
 		},
-		body: {
+		jsonBody: {
 			error: {
-				statusName: httpStatusCodeToDescription(statusCode),
 				statusCode: statusCode,
+				statusName: httpStatusCodeToDescription(statusCode),
 				message: ["string", "number", "boolean"].includes(typeof error) ? error : JSON.stringify(error),
 				title: title || "Error",
 				errors: null

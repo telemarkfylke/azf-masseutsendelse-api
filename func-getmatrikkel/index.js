@@ -2,11 +2,12 @@
   Import dependencies
 */
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 const { MATRIKKEL } = require("../config")
 const getAccessToken = require("../sharedcode/helpers/get-entraid-token")
 
-module.exports = async (context, req) => {
+const getMatrikkel = async (req) => {
 	// Authentication / Authorization
 	await require("../sharedcode/auth/auth").auth(req)
 
@@ -27,14 +28,16 @@ module.exports = async (context, req) => {
 	}
 
 	// Get ID from request
-	const endpoint = decodeURIComponent(context.bindingData.endpoint)
+	const endpoint = decodeURIComponent(req.params.endpoint)
+	// TODO: Could we perhaps use req.text() directly instead of parsing and then re-stringifying?
+	const requestBody = await req.json()
 	const response = await fetch(`${MATRIKKEL.MATRIKKEL_BASEURL}/${endpoint}`, {
 		method: "POST",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			"x-functions-key": MATRIKKEL.MATRIKKEL_KEY
 		},
-		body: JSON.stringify(req.body)
+		body: JSON.stringify(requestBody)
 	})
 
 	if (!response.ok) {
@@ -45,3 +48,12 @@ module.exports = async (context, req) => {
 
 	return await response.json()
 }
+
+app.http("getMatrikkel", {
+	authLevel: "anonymous",
+	handler: getMatrikkel,
+	methods: ["POST"],
+	route: "matrikkel/{endpoint}"
+})
+
+module.exports = { getMatrikkel }

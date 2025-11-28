@@ -1,7 +1,7 @@
 /*
   Import dependencies
 */
-const { logger } = require("@vestfoldfylke/loglady");
+const { logger } = require("@vestfoldfylke/loglady")
 const HTTPError = require("../vtfk-errors/httperror")
 const { getCase } = require("../helpers/checkP360Case")
 

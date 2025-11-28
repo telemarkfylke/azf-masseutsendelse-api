@@ -3,13 +3,14 @@ const Jobs = require("../sharedcode/models/jobs.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const { alertTeams } = require("../sharedcode/helpers/alertTeams.js")
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require("../sharedcode/helpers/archive.js")
 const { createStatistics } = require("../sharedcode/helpers/statistics.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 
-module.exports = async (context, req) => {
+const getHandleJobs = async (req, context) => {
 	let jobId
 	try {
 		logger.info("Checking AUTH")
@@ -158,7 +159,13 @@ module.exports = async (context, req) => {
 										logger.info("Handling the failed task, updating")
 										numbOfFailedTasks += 1
 										await alertTeams(JSON.stringify(error.response.data), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
-										logger.errorException(error, "The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!", job, jobId, currentTaskIndex)
+										logger.errorException(
+											error,
+											"The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!",
+											job,
+											jobId,
+											currentTaskIndex
+										)
 										if (doc.tasks.syncRecipients[currentTaskIndex]?.retry) {
 											doc.tasks.syncRecipients[currentTaskIndex].retry += 1
 										}
@@ -544,3 +551,10 @@ module.exports = async (context, req) => {
 		return errorResponse(error, `The job with the JobId ${jobId} failed`, 400)
 	}
 }
+
+app.http("getHandleJobs", {
+	authLevel: "anonymous",
+	handler: getHandleJobs,
+	methods: ["GET"],
+	route: "handleJobs"
+})

@@ -3,13 +3,14 @@ const Jobs = require("../sharedcode/models/jobs.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require("../sharedcode/helpers/archive.js")
 const { createStatistics } = require("../sharedcode/helpers/statistics.js")
 const { alertTeams } = require("../sharedcode/helpers/alertTeams.js")
 
-module.exports = async (context, _req) => {
+const getHandleJobs = async (_req, context) => {
 	let jobId
 	try {
 		// Await the DB connection
@@ -546,3 +547,8 @@ module.exports = async (context, _req) => {
 		return errorResponse(error, "Something went really wrong", 400)
 	}
 }
+
+app.timer("getHandleJobsTimer", {
+	schedule: "0 */10 * * * *", // Every 10 minutes
+	handler: getHandleJobs
+})

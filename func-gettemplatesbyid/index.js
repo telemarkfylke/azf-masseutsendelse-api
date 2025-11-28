@@ -1,16 +1,17 @@
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Templates = require("../sharedcode/models/templates.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-module.exports = async (context, req) => {
+const getTemplatesById = async (req) => {
 	try {
 		// Authentication / Authorization
 		await require("../sharedcode/auth/auth").auth(req)
 
 		// Get ID from request
-		const id = context.bindingData.id
+		const id = req.params.id
 
 		if (!id) {
 			return new HTTPError(400, "No template id was provided").toHTTPResponse()
@@ -26,7 +27,8 @@ module.exports = async (context, req) => {
 		}
 
 		// Return the template object
-		const templateById = await Templates.findById(id, req.body, { new: true })
+		const requestBody = await req.json()
+		const templateById = await Templates.findById(id, requestBody, { new: true })
 
 		return response(templateById)
 	} catch (err) {
@@ -34,3 +36,12 @@ module.exports = async (context, req) => {
 		return errorResponse(err, "Failed to get template by id", 400)
 	}
 }
+
+app.http("getTemplatesById", {
+	authLevel: "anonymous",
+	handler: getTemplatesById,
+	methods: ["GET"],
+	route: "templates/{id}"
+})
+
+module.exports = { getTemplatesById }

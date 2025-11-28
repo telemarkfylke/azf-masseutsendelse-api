@@ -33,12 +33,12 @@ class HTTPError extends Error {
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: {
+			jsonBody: {
 				error: {
-					statusName: this.statusName,
 					statusCode: this.statusCode,
-					title: this.title,
+					statusName: this.statusName,
 					message: this.message,
+					title: this.title,
 					errors: this.errors
 				},
 				documentation: this.documentation ? this.documentation : {}

@@ -1,16 +1,16 @@
 // Endpoints
-const postTemplate = require("../../../func-posttemplate/index")
-const getTemplateById = require("../../../func-gettemplatesbyid/index")
-const getTemplates = require("../../../func-gettemplates/index")
-const editTemplate = require("../../../func-puttemplates/index")
-const postDispatches = require("../../../func-postdispatches/index")
-const getDispatchesById = require("../../../func-getdispatchesbyid/index")
-// const getDispatches = require('../../../func-getdispatches/index')
-const editDispatches = require("../../../func-editdispatches/index")
-// const getReadyDispatches = require('../../../func-getreadydispatches/index')
-const completeDispatch = require("../../../func-completedispatch/index")
-const getMatrikkel = require("../../../func-getmatrikkel/index")
-const getBlob = require("../../../func-getblob")
+const { postTemplate } = require("../../../func-posttemplate/index")
+const { getTemplatesById } = require("../../../func-gettemplatesbyid/index")
+const { getTemplates } = require("../../../func-gettemplates/index")
+const { putTemplates } = require("../../../func-puttemplates/index")
+const { postDispatches } = require("../../../func-postdispatches/index")
+const { getDispatchesById } = require("../../../func-getdispatchesbyid/index")
+// const { getDispatches } = require('../../../func-getdispatches/index')
+const { editDispatches } = require("../../../func-editdispatches/index")
+// const { getReadyDispatches } = require('../../../func-getreadydispatches/index')
+const { completeDispatch } = require("../../../func-completedispatch/index")
+const { getMatrikkel } = require("../../../func-getmatrikkel/index")
+const { getBlob } = require("../../../func-getblob")
 
 // Valid test cases
 const validTemplate = require("../testCases/validCases/post_template")
@@ -120,113 +120,139 @@ describe("Endpoint testing", () => {
 	describe("Testing valid cases", () => {
 		// Template tests
 		test("Should post a template to the db", async () => {
-			const post = await postTemplate(context, validTemplate)
+			const post = await postTemplate(validTemplate, context)
 
-			idTemplate = post.body._id
-			_timestampTemplate = post.body.createdTimestamp
+			idTemplate = post.jsonBody._id
+			_timestampTemplate = post.jsonBody.createdTimestamp
 
 			expect(post).resolves
-			expect(post.body).toBeTruthy()
+			expect(post.jsonBody).toBeTruthy()
 			expect(post.status).toEqual(200)
-			expect(post.body.name).toBe("Jest Test Template")
-			expect(post.body.createdBy).toBe("timetrigger")
-			expect(post.body.template).toBe("Et eller annet")
+			expect(post.jsonBody.name).toBe("Jest Test Template")
+			expect(post.jsonBody.createdBy).toBe("timetrigger")
+			expect(post.jsonBody.template).toBe("Et eller annet")
 		})
 
 		test("Should get a template with a given id from the db", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: idTemplate
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: idTemplate
+				},
+				json: async () => {
+					return {}
+				}
 			}
-			const get = await getTemplateById(contextModified, apikeyHeader)
+			const get = await getTemplatesById(request, context)
 
 			expect(get).resolves
 			expect(get).toBeTruthy()
 			expect(get.status).toEqual(200)
-			expect(get.body.name).toBe("Jest Test Template")
-			expect(get.body.createdBy).toBe("timetrigger")
-			expect(get.body.template).toBe("Et eller annet")
+			expect(get.jsonBody.name).toBe("Jest Test Template")
+			expect(get.jsonBody.createdBy).toBe("timetrigger")
+			expect(get.jsonBody.template).toBe("Et eller annet")
 		})
 
 		test("Should get all the templates from the db", async () => {
-			const get = await getTemplates(context, apikeyHeader)
+			const get = await getTemplates(apikeyHeader, context)
 
 			expect(get).resolves
 			expect(get).toBeTruthy()
 			expect(get.status).toEqual(200)
-			expect(get.body[0].name).toBe("Jest Test Template")
-			expect(get.body[0].createdBy).toBe("timetrigger")
-			expect(get.body[0].template).toBe("Et eller annet")
+			expect(get.jsonBody[0].name).toBe("Jest Test Template")
+			expect(get.jsonBody[0].createdBy).toBe("timetrigger")
+			expect(get.jsonBody[0].template).toBe("Et eller annet")
 		})
 
 		test("Should edit a given template", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: idTemplate
-			}
-
-			request = {
+			const request = {
 				headers: {
 					"x-api-key": process.env.APIKEYS_TEST
 				},
-				body: {
-					name: "Jeg er redigert",
-					template: "Ja, det er jeg også."
+				params: {
+					id: idTemplate
+				},
+				json: async () => {
+					return {
+						name: "Jeg er redigert",
+						template: "Ja, det er jeg også."
+					}
 				}
 			}
 
-			const edit = await editTemplate(context, request)
+			const edit = await putTemplates(request, context)
 
 			expect(edit).resolves
 			expect(edit).toBeTruthy()
 			expect(edit.status).toEqual(200)
-			expect(edit.body.name).not.toEqual("Jest Test Template")
-			expect(edit.body.template).not.toEqual("Et eller annet")
-			expect(edit.body.name).toEqual("Jeg er redigert")
-			expect(edit.body.template).toEqual("Ja, det er jeg også.")
+			expect(edit.jsonBody.name).not.toEqual("Jest Test Template")
+			expect(edit.jsonBody.template).not.toEqual("Et eller annet")
+			expect(edit.jsonBody.name).toEqual("Jeg er redigert")
+			expect(edit.jsonBody.template).toEqual("Ja, det er jeg også.")
 		})
 
-		// // Dispatch tests
-		// test('Should post a dispatch object to the db with attachments and template', async () => {
-		//   const post = await postDispatches(context, validDispatchBoth)
+		test("Should call the getBlob endpoint correctly", async () => {
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: 1,
+					name: "test",
+					file: "filename.docx"
+				},
+				json: async () => {
+					return {}
+				}
+			}
 
-		//   idDispatch = post.body._id
+			const get = await getBlob(request, context)
+
+			expect(get).resolves
+			expect(get).toBeTruthy()
+			expect(get.status).toEqual(200)
+			expect(get.body).toEqual("filename.docx")
+		})
+
+		// Dispatch tests
+		// test('Should post a dispatch object to the db with attachments and template', async () => {
+		//   const post = await postDispatches(validDispatchBoth, context)
+
+		//   idDispatch = post.jsonBody._id
 
 		//   expect(post).resolves
-		//   expect(post.body).toBeTruthy()
+		//   expect(post.jsonBody).toBeTruthy()
 		//   expect(post.status).toEqual(200)
-		//   expect(post.body.title).toBe('Parallel test')
-		//   expect(post.body._id).toBe(idDispatch)
-		//   expect.objectContaining(post.body.template)
-		//   expect.arrayContaining(post.body.attachments)
+		//   expect(post.jsonBody.title).toBe('Parallel test')
+		//   expect(post.jsonBody._id).toBe(idDispatch)
+		//   expect.objectContaining(post.jsonBody.template)
+		//   expect.arrayContaining(post.jsonBody.attachments)
 		// })
 
 		// test('Should post a dispatch object to the db with attachments', async () => {
-		//   const post = await postDispatches(context, validDispatchAttachments)
+		//   const post = await postDispatches(validDispatchAttachments, context)
 
-		//   idDispatchAttachments = post.body._id
+		//   idDispatchAttachments = post.jsonBody._id
 
 		//   expect(post).resolves
-		//   expect(post.body).toBeTruthy()
+		//   expect(post.jsonBody).toBeTruthy()
 		//   expect(post.status).toEqual(200)
-		//   expect(post.body.title).toBe('Parallel test')
-		//   expect(post.body._id).toBe(idDispatchAttachments)
-		//   expect.not.objectContaining(post.body.template)
-		//   expect.arrayContaining(post.body.attachments)
+		//   expect(post.jsonBody.title).toBe('Parallel test')
+		//   expect(post.jsonBody._id).toBe(idDispatchAttachments)
+		//   expect.not.objectContaining(post.jsonBody.template)
+		//   expect.arrayContaining(post.jsonBody.attachments)
 		// })
 
 		// test('Should post a dispatch object to the db with template', async () => {
-		//   const post = await postDispatches(context, validDispatchTemplate)
+		//   const post = await postDispatches(validDispatchTemplate, context)
 
-		//   idDispatchOnlyTemplate = post.body._id
+		//   idDispatchOnlyTemplate = post.jsonBody._id
 
 		//   expect(post).resolves
-		//   expect(post.body).toBeTruthy()
+		//   expect(post.jsonBody).toBeTruthy()
 		//   expect(post.status).toEqual(200)
-		//   expect(post.body.title).toBe('Parallel test')
-		//   expect(post.body._id).toBe(idDispatchOnlyTemplate)
-		//   expect.objectContaining(post.body.template)
-		//   expect.not.arrayContaining(post.body.attachments)
+		//   expect(post.jsonBody.title).toBe('Parallel test')
+		//   expect(post.jsonBody._id).toBe(idDispatchOnlyTemplate)
+		//   expect.objectContaining(post.jsonBody.template)
+		//   expect.not.arrayContaining(post.jsonBody.attachments)
 		// })
 
 		// test('Should get a dispatch with a given id from the db', async () => {
@@ -235,27 +261,27 @@ describe("Endpoint testing", () => {
 		//     id: idDispatch
 		//   }
 
-		//   const get = await getDispatchesById(contextModified, apikeyHeader)
+		//   const get = await getDispatchesById(apikeyHeader, contextModified)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
 		//   expect(get.status).toEqual(200)
-		//   expect(get.body._id).toEqual(idDispatch)
-		//   expect(get.body.title).toBe('Parallel test')
-		//   expect.objectContaining(get.body.template)
-		//   expect.arrayContaining(get.body.attachments)
+		//   expect(get.jsonBody._id).toEqual(idDispatch)
+		//   expect(get.jsonBody.title).toBe('Parallel test')
+		//   expect.objectContaining(get.jsonBody.template)
+		//   expect.arrayContaining(get.jsonBody.attachments)
 		// })
 
 		// test('Should get all the dispatches from the db', async () => {
-		//   const get = await getDispatches(context, apikeyHeader)
+		//   const get = await getDispatches(apikeyHeader, context)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
 		//   expect(get.status).toEqual(200)
-		//   expect.arrayContaining(get.body)
-		//   expect(get.body[0]._id).toEqual(idDispatch)
-		//   expect(get.body[1]._id).toEqual(idDispatchAttachments)
-		//   expect(get.body[2]._id).toEqual(idDispatchOnlyTemplate)
+		//   expect.arrayContaining(get.jsonBody)
+		//   expect(get.jsonBody[0]._id).toEqual(idDispatch)
+		//   expect(get.jsonBody[1]._id).toEqual(idDispatchAttachments)
+		//   expect(get.jsonBody[2]._id).toEqual(idDispatchOnlyTemplate)
 		// })
 
 		// test('Should edit a given dispatch', async () => {
@@ -264,13 +290,13 @@ describe("Endpoint testing", () => {
 		//     id: idDispatch
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchEdit)
+		//   const edit = await editDispatches(validDispatchEdit, contextModified)
 
 		//   expect(edit).resolves
 		//   expect(edit).toBeTruthy()
 		//   expect(edit.status).toEqual(200)
-		//   expect(edit.body.status).not.toEqual('notapproved')
-		//   expect(edit.body.status).toEqual('approved')
+		//   expect(edit.jsonBody.status).not.toEqual('notapproved')
+		//   expect(edit.jsonBody.status).toEqual('approved')
 		// })
 
 		// test('Should edit the given dispatch object to inprogress', async () => {
@@ -279,13 +305,13 @@ describe("Endpoint testing", () => {
 		//     id: idDispatchOnlyTemplate
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchEditInprogress)
+		//   const edit = await editDispatches(validDispatchEditInprogress, contextModified)
 
 		//   expect(edit).resolves
 		//   expect(edit).toBeTruthy()
 		//   expect(edit.status).toEqual(200)
-		//   expect(edit.body.status).not.toEqual('notapproved')
-		//   expect(edit.body.status).toEqual('inprogress')
+		//   expect(edit.jsonBody.status).not.toEqual('notapproved')
+		//   expect(edit.jsonBody.status).toEqual('inprogress')
 		// })
 
 		// test('Should edit the given dispatch object to approved', async () => {
@@ -294,25 +320,25 @@ describe("Endpoint testing", () => {
 		//     id: idDispatchAttachments
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchEditApproved)
+		//   const edit = await editDispatches(validDispatchEditApproved, contextModified)
 
 		//   expect(edit).resolves
 		//   expect(edit).toBeTruthy()
 		//   expect(edit.status).toEqual(200)
-		//   expect(edit.body.status).not.toEqual('notapproved')
-		//   expect(edit.body.status).toEqual('approved')
-		//   expect(edit.body.approvedBy).toEqual('timetrigger')
-		//   expect(edit.body.approvedById).toEqual('timetrigger')
-		//   expect(edit.body.approvedByEmail).toEqual('timetrigger@telemarkfylke.no' || 'timetrigger@vestfoldfylke.no')
+		//   expect(edit.jsonBody.status).not.toEqual('notapproved')
+		//   expect(edit.jsonBody.status).toEqual('approved')
+		//   expect(edit.jsonBody.approvedBy).toEqual('timetrigger')
+		//   expect(edit.jsonBody.approvedById).toEqual('timetrigger')
+		//   expect(edit.jsonBody.approvedByEmail).toEqual('timetrigger@telemarkfylke.no' || 'timetrigger@vestfoldfylke.no')
 		// })
 
-		// test('Should return empty body since there\'s no approved dispatches with the correct time', async () => {
-		//   const get = await getReadyDispatches(context, apikeyHeader)
+		// test('Should return empty jsonBody since there\'s no approved dispatches with the correct time', async () => {
+		//   const get = await getReadyDispatches(apikeyHeader, context)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
 		//   expect(get.status).toEqual(200)
-		//   expect(get.body).toEqual([])
+		//   expect(get.jsonBody).toEqual([])
 		// })
 
 		// test('Should edit a given dispatch, approvedTimeStamp', async () => {
@@ -321,29 +347,29 @@ describe("Endpoint testing", () => {
 		//     id: idDispatch
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchEditTimestamp)
+		//   const edit = await editDispatches(validDispatchEditTimestamp, contextModified)
 
 		//   expect(edit).resolves
 		//   expect(edit).toBeTruthy()
 		//   expect(edit.status).toEqual(200)
-		//   expect(edit.body.status).toEqual('approved')
+		//   expect(edit.jsonBody.status).toEqual('approved')
 		//   // Denne testen fungerer lokalt, ikke på github pga tidssoner osv.
-		//   // expect(edit.body.approvedTimestamp.toString()).toMatch('Thu Feb 03 2022 10:52:23 GMT+0100 (sentraleuropeisk normaltid)')
+		//   // expect(edit.jsonBody.approvedTimestamp.toString()).toMatch('Thu Feb 03 2022 10:52:23 GMT+0100 (sentraleuropeisk normaltid)')
 		// })
 
 		// test('Should return all dispatches with the correct approvedTimestamp', async () => {
-		//   const get = await getReadyDispatches(context, apikeyHeader)
+		//   const get = await getReadyDispatches(apikeyHeader, context)
 
-		//   timestampDispatch = get.body[0].e18Job.tasks[3].data.parameter.date
+		//   timestampDispatch = get.jsonBody[0].e18Job.tasks[3].data.parameter.date
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
 		//   expect(get.status).toEqual(200)
-		//   expect(get.body).toBeInstanceOf(Array)
-		//   expect(get.body[0]).toBeInstanceOf(Object)
-		//   expect(get.body[0]._id).toEqual(idDispatch)
-		//   expect(get.body[0].e18Job.tasks).toBeInstanceOf(Array)
-		//   expect(get.body[0].e18Job.tasks).toEqual([
+		//   expect(get.jsonBody).toBeInstanceOf(Array)
+		//   expect(get.jsonBody[0]).toBeInstanceOf(Object)
+		//   expect(get.jsonBody[0]._id).toEqual(idDispatch)
+		//   expect(get.jsonBody[0].e18Job.tasks).toBeInstanceOf(Array)
+		//   expect(get.jsonBody[0].e18Job.tasks).toEqual([
 		//     {
 		//       system: 'p360',
 		//       method: 'SyncPrivatePerson',
@@ -435,18 +461,18 @@ describe("Endpoint testing", () => {
 		//       data: { method: 'DispatchDocuments', service: 'DocumentService' }
 		//     }
 		//   ])
-		//   expect.objectContaining(get.body[0].template)
-		//   expect.arrayContaining(get.body[0].attachments)
+		//   expect.objectContaining(get.jsonBody[0].template)
+		//   expect.arrayContaining(get.jsonBody[0].attachments)
 		// })
 
 		// test('Should complete dispatch object with status approved', async () => {
-		//   const complete = await completeDispatch(context, validDispatchEditApproved)
+		//   const complete = await completeDispatch(validDispatchEditApproved, context)
 		//   console.log(complete)
 		//   expect(complete).resolves
 		//   expect(complete).toBeTruthy()
 		//   expect(complete.status).toEqual(200)
-		//   expect(complete.body.status).not.toEqual('approved')
-		//   expect(complete.body.status).toEqual('completed')
+		//   expect(complete.jsonBody.status).not.toEqual('approved')
+		//   expect(complete.jsonBody.status).toEqual('completed')
 		// })
 
 		// test('Should call the get matrikkel endpoint correctly', async () => {
@@ -455,160 +481,155 @@ describe("Endpoint testing", () => {
 		//     endpoint: 'jestTest'
 		//   }
 
-		//   const get = await getMatrikkel(contextModified, apikeyHeader)
+		//   const get = await getMatrikkel(apikeyHeader, contextModified)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
 		//   expect(get.status).toEqual(200)
-		//   expect(get.body.msg).toEqual('Matrikkel api successfully connected')
+		//   expect(get.jsonBody.msg).toEqual('Matrikkel api successfully connected')
 		// })
-
-		test("Should call the getBlob endpoint correctly", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: 1,
-				name: "test",
-				file: "filename.docx"
-			}
-
-			const get = await getBlob(contextModified, apikeyHeader)
-
-			expect(get).resolves
-			expect(get).toBeTruthy()
-			expect(get.status).toEqual(200)
-			expect(get.body).toEqual("filename.docx")
-		})
 	})
+
 	// Invalid cases
 	describe("Testing invalid cases", () => {
 		// Dispatch testes
 		test("Should reject posting a dispatch without template and attachments", async () => {
-			const post = await postDispatches(context, invalidDispatch)
+			const post = await postDispatches(invalidDispatch, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(400)
 		})
 
-		test("Should reject posting a dispatch because the body is empty", async () => {
-			const post = await postDispatches(context, apikeyHeader)
+		test("Should reject posting a dispatch because the jsonBody is empty", async () => {
+			const post = await postDispatches(apikeyHeader, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(400)
 		})
 
 		test("Should reject posting a dispatch because the dispatch object is missing the archivenumber", async () => {
-			const post = await postDispatches(context, invalidDispatchArchiveNumber)
+			const post = await postDispatches(invalidDispatchArchiveNumber, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(400)
 		})
 
 		test('Should reject posting a dispatch with only attachments because the "AZURE_BLOB_CONNECTIONSTRING_TEST" is missing', async () => {
 			process.env.AZURE_BLOB_CONNECTIONSTRING_TEST = ""
 
-			const post = await postDispatches(context, validDispatchAttachments)
+			const post = await postDispatches(validDispatchAttachments, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test('Should reject posting a dispatch with only attachments because the "AZURE_BLOB_CONTAINERNAME_TEST" is missing', async () => {
 			process.env.AZURE_BLOB_CONTAINERNAME_TEST = ""
 
-			const post = await postDispatches(context, validDispatchAttachments)
+			const post = await postDispatches(validDispatchAttachments, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test("Should reject posting a dispatch with attachments because a file is missing file extension", async () => {
-			const post = await postDispatches(context, invalidDispatchMissingFileExtension)
+			const post = await postDispatches(invalidDispatchMissingFileExtension, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test("Should reject posting a dispatch with attachments because a file got an illegal file extension", async () => {
-			const post = await postDispatches(context, invalidDispatchIllegalFileExtension)
+			const post = await postDispatches(invalidDispatchIllegalFileExtension, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test("Should reject posting a dispatch with attachments because a file got an illegal character in the filename", async () => {
-			const post = await postDispatches(context, invalidDispatchIllegalCharacter)
+			const post = await postDispatches(invalidDispatchIllegalCharacter, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test("Should not get a dispatch object from the db since theres no id provided", async () => {
 			process.env.ID_DISPATCH_TEST = ""
-			const contextModified = context
-			contextModified.bindingData = {
-				id: ""
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: ""
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getDispatchesById(contextModified, apikeyHeader)
+			const get = await getDispatchesById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should not get a dispatch object from the db since the id provided dose not exist", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "61f9502c1a6e890eec90d2b1"
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: "61f9502c1a6e890eec90d2b1"
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getDispatchesById(contextModified, apikeyHeader)
+			const get = await getDispatchesById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(404)
 		})
 
 		test("Should not edit a dispatch object since the id provided dose not exist", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "61f9502c1a6e890eec90d2b1"
-			}
-
-			request = {
+			const request = {
 				headers: {
 					"x-api-key": process.env.APIKEYS_TEST
 				},
-				body: {
-					status: "Ja, det er jeg også."
+				params: {
+					id: "61f9502c1a6e890eec90d2b1"
+				},
+				json: async () => {
+					return {
+						status: "Ja, det er jeg også."
+					}
 				}
 			}
 
-			const edit = await editDispatches(contextModified, request)
+			const edit = await editDispatches(request, context)
 
 			expect(edit).toBeInstanceOf(Object)
-			expect(edit.body).toBeDefined()
+			expect(edit.jsonBody).toBeDefined()
 			expect(edit.status).toEqual(404)
 		})
 
-		// test('Should not edit the given dispatch object since the status is inprogress. Running dispatch should only be set to completed', async () => {
+		/*// test('Should not edit the given dispatch object since the status is inprogress. Running dispatch should only be set to completed', async () => {
 		//   const contextModified = context
 		//   contextModified.bindingData = {
 		//     id: idDispatchOnlyTemplate
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchAttachments)
+		//   const edit = await editDispatches(validDispatchAttachments, contextModified)
 
 		//   expect(edit).toBeInstanceOf(Object)
-		//   expect(edit.body.message).toBeDefined()
+		//   expect(edit.jsonBody.message).toBeDefined()
 		//   expect(edit.status).toEqual(404)
 		// })
 
@@ -618,10 +639,10 @@ describe("Endpoint testing", () => {
 		//     id: idDispatchOnlyTemplate
 		//   }
 
-		//   const edit = await editDispatches(contextModified, validDispatchEditInprogress)
+		//   const edit = await editDispatches(validDispatchEditInprogress, contextModified)
 
 		//   expect(edit).toBeInstanceOf(Object)
-		//   expect(edit.body.message).toBeDefined()
+		//   expect(edit.jsonBody.message).toBeDefined()
 		//   expect(edit.status).toEqual(404)
 		// })
 
@@ -631,10 +652,10 @@ describe("Endpoint testing", () => {
 		//     id: idDispatchAttachments
 		//   }
 
-		//   const edit = await editDispatches(contextModified, invalidDispatchMissingFileExtension)
+		//   const edit = await editDispatches(invalidDispatchMissingFileExtension, contextModified)
 
 		//   expect(edit).toBeInstanceOf(Object)
-		//   expect(edit.body.message).toBeDefined()
+		//   expect(edit.jsonBody.message).toBeDefined()
 		//   expect(edit.status).toEqual(404)
 		// })
 
@@ -644,208 +665,248 @@ describe("Endpoint testing", () => {
 		//     id: idDispatchAttachments
 		//   }
 
-		//   const edit = await editDispatches(contextModified, invalidDispatchIllegalFileExtension)
+		//   const edit = await editDispatches(invalidDispatchIllegalFileExtension, contextModified)
 
 		//   expect(edit).toBeInstanceOf(Object)
-		//   expect(edit.body.message).toBeDefined()
+		//   expect(edit.jsonBody.message).toBeDefined()
 		//   expect(edit.status).toEqual(404)
-		// })
+		// })*/
 
 		test("Should reject completing a dispatch since there is no id provided", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: ""
+			const request = {
+				...validDispatchEditApproved,
+				params: {
+					id: ""
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(request, context)
 
 			expect(complete).toBeInstanceOf(Object)
-			expect(complete.body).toBeDefined()
+			expect(complete.jsonBody).toBeDefined()
 			expect(complete.status).toEqual(400)
 		})
 
 		test("Should reject completing a dispatch since the id provided is not valid", async () => {
 			process.env.ID_DISPATCH_TEST = "61f9502c1a6e890eec90d2b1"
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "61f9502c1a6e890eec90d2b1"
+			const request = {
+				...validDispatchEditApproved,
+				params: {
+					id: "61f9502c1a6e890eec90d2b1"
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(request, context)
 
 			expect(complete).toBeInstanceOf(Object)
-			expect(complete.body).toBeDefined()
+			expect(complete.jsonBody).toBeDefined()
 			expect(complete.status).toEqual(404)
 		})
 
 		test("Should reject completing a dispatch since the dispatch status is not set to approved", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: idDispatchOnlyTemplate
+			const request = {
+				...validDispatchEditApproved,
+				params: {
+					id: idDispatchOnlyTemplate
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const complete = await completeDispatch(contextModified, validDispatchEditApproved)
+			const complete = await completeDispatch(request, context)
 
 			expect(complete).toBeInstanceOf(Object)
-			expect(complete.body).toBeDefined()
+			expect(complete.jsonBody).toBeDefined()
 			expect(complete.status).toEqual(400)
 		})
 
 		test("Should not call the matrikkel api since the url is missing", async () => {
 			process.env.VTFK_MATRIKKELPROXY_BASEURL = ""
 
-			const get = await getMatrikkel(context, apikeyHeader)
+			const get = await getMatrikkel(apikeyHeader, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should not call the matrikkel api since the apikey is missing", async () => {
 			process.env.VTFK_MATRIKKELPROXY_APIKEY = ""
 
-			const get = await getMatrikkel(context, apikeyHeader)
+			const get = await getMatrikkel(apikeyHeader, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should reject the get blob endpoint request since the id is missing", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "",
-				name: "test",
-				file: "filename.docx"
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: "",
+					name: "test",
+					file: "filename.docx"
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getBlob(contextModified, apikeyHeader)
+			const get = await getBlob(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should reject the get blob endpoint request since the name is missing", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: 1,
-				name: "",
-				file: "filename.docx"
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: 1,
+					name: "",
+					file: "filename.docx"
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getBlob(contextModified, apikeyHeader)
+			const get = await getBlob(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should reject the get blob endpoint request since the file is missing", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: 1,
-				name: "test",
-				file: ""
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: 1,
+					name: "test",
+					file: ""
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getBlob(contextModified, apikeyHeader)
+			const get = await getBlob(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should reject the archive endpoint request since the endpoint url is missing", async () => {
 			process.env.VTFK_P360_ARCHIVE_ENDPOINT = ""
 
-			const post = await postDispatches(context, validDispatchBoth)
+			const post = await postDispatches(validDispatchBoth, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		test("Should reject the archive endpoint request since the endpoint key is missing", async () => {
 			process.env.VTFK_P360_ARCHIVE_SUBSCRIPTION_KEY = ""
 
-			const post = await postDispatches(context, validDispatchBoth)
+			const post = await postDispatches(validDispatchBoth, context)
 
 			expect(post).toBeInstanceOf(Object)
-			expect(post.body).toBeDefined()
+			expect(post.jsonBody).toBeDefined()
 			expect(post.status).toEqual(500)
 		})
 
 		// Template tests
 		test("Should not get a template from the db since theres no id provided", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: ""
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: ""
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getTemplateById(contextModified, apikeyHeader)
+			const get = await getTemplatesById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should not get a template from the db since the id provided dose not exist", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "61f9502c1a6e890eec90d2b1"
+			const request = {
+				...apikeyHeader,
+				params: {
+					id: "61f9502c1a6e890eec90d2b1"
+				},
+				json: async () => {
+					return {}
+				}
 			}
 
-			const get = await getTemplateById(contextModified, apikeyHeader)
+			const get = await getTemplatesById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
-			expect(get.body).toBeDefined()
+			expect(get.jsonBody).toBeDefined()
 			expect(get.status).toEqual(400)
 		})
 
 		test("Should not get a template from the db since theres no id provided", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: ""
-			}
-
-			request = {
+			const request = {
 				headers: {
 					"x-api-key": process.env.APIKEYS_TEST
 				},
-				body: {
-					name: "Jeg er reddigert",
-					template: "Ja, det er jeg også."
+				params: {
+					id: ""
+				},
+				json: async () => {
+					return {
+						name: "Jeg er reddigert",
+						template: "Ja, det er jeg også."
+					}
 				}
 			}
 
-			const edit = await editTemplate(contextModified, request)
+			const edit = await putTemplates(request, context)
 
 			expect(edit).toBeInstanceOf(Object)
-			expect(edit.body).toBeDefined()
+			expect(edit.jsonBody).toBeDefined()
 			expect(edit.status).toEqual(400)
 		})
 
-		test("Should not edit a template from the db since the id provided dose not exist", async () => {
-			const contextModified = context
-			contextModified.bindingData = {
-				id: "61f9502c1a6e890eec90d2b1"
-			}
-
-			request = {
+		test("Should not edit a template from the db since the id provided does not exist", async () => {
+			const request = {
 				headers: {
 					"x-api-key": process.env.APIKEYS_TEST
 				},
-				body: {
-					name: "Jeg er reddigert",
-					template: "Ja, det er jeg også."
+				params: {
+					id: "61f9502c1a6e890eec90d2b1"
+				},
+				json: async () => {
+					return {
+						name: "Jeg er reddigert",
+						template: "Ja, det er jeg også."
+					}
 				}
 			}
 
-			const edit = await editTemplate(contextModified, request)
+			const edit = await putTemplates(request, context)
 
 			expect(edit).toBeInstanceOf(Object)
-			expect(edit.body).toBeDefined()
+			expect(edit.jsonBody).toBeDefined()
 			expect(edit.status).toEqual(400)
 		})
 	})

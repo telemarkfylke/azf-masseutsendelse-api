@@ -1,12 +1,13 @@
 const { logger } = require("@vestfoldfylke/loglady")
+const { app } = require("@azure/functions")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-module.exports = async (context, req) => {
+const getBRReg = async (req) => {
 	// Authentication / Authorization
 	await require("../sharedcode/auth/auth").auth(req)
 
 	// Get ID from request
-	const id = context.bindingData.id
+	const id = req.params.id
 	if (!id) {
 		return new HTTPError(400, "No dispatch id was provided").toHTTPResponse()
 	}
@@ -27,3 +28,10 @@ module.exports = async (context, req) => {
 
 	return await response.json()
 }
+
+app.http("getBRReg", {
+	authLevel: "anonymous",
+	handler: getBRReg,
+	methods: ["GET"],
+	route: "brreg/{id}"
+})
