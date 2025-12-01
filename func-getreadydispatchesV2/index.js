@@ -8,7 +8,7 @@ const getReadyDispatches = async (req, context) => {
 	try {
 		return await getReadyDispatchesV2(context, req)
 	} catch (err) {
-		await alertTeams(err, "error", "func-getreadydispatchesV2 failed", [], "no id found", context.executionContext.functionName)
+		await alertTeams(err, "error", "func-getreadydispatchesV2 failed", [], "no id found", context.functionName)
 		logger.errorException(err, "Failed to get ready dispatches V2")
 		return errorResponse(err, "Failed to get ready dispatches V2", 400)
 	}

@@ -37,10 +37,10 @@ const getHandleJobs = async (req, context) => {
 		// Handle if no jobs.
 		if (!jobs) {
 			logger.info("No jobs to handle found, exit")
-			// await alertTeams([], 'completed', [] , 'job', context.executionContext.functionName)
+			// await alertTeams([], 'completed', [] , 'job', context.functionName)
 			// error: any, color: any, failedTask: any, completedJob: any, jobId: any, endpoint: any
-			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'failed task' , [], undefined, context.executionContext.functionName)
-			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'funcgetandlejobsDev failed', [], 'no id found', context.executionContext.functionName)
+			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'failed task' , [], undefined, context.functionName)
+			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'funcgetandlejobsDev failed', [], 'no id found', context.functionName)
 			// await alertTeams({}, 'completed', {}, 'This job is done', 'et endpoint') Dette er ikke teams webhook glad i
 			return response("No jobs found")
 		}
@@ -82,9 +82,9 @@ const getHandleJobs = async (req, context) => {
 						})
 						logger.info("The failedJobs array for jobId {JobId} have been updated", jobId)
 						logger.error("The job: {Job} with mongoDB id: {JobId} have failed 7 times and the whole job is stopped!", job, jobId)
-						await alertTeams("Job failed 7 times, please look at it!", "error", failedJobsArr, [], context.executionContext.functionName)
+						await alertTeams("Job failed 7 times, please look at it!", "error", failedJobsArr, [], context.functionName)
 					} catch (error) {
-						await alertTeams(JSON.stringify(error), "error", "pushing failed job to mongodb", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(error), "error", "pushing failed job to mongodb", [], jobId, context.functionName)
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
 						return errorResponse(error, "Failed pushing the failed job to mongodb", 400)
 					}
@@ -152,13 +152,13 @@ const getHandleJobs = async (req, context) => {
 										}
 									} else {
 										logger.error("Failed Syncing recipient using: {Method} in job: {Job} with mongoDB id: {JobId}", method, job, jobId)
-										await alertTeams(`Failed Syncing recipient using: ${method} in job: ${job}`, "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+										await alertTeams(`Failed Syncing recipient using: ${method} in job: ${job}`, "error", "syncRecipients", [], jobId, context.functionName)
 									}
 								} catch (error) {
 									try {
 										logger.info("Handling the failed task, updating")
 										numbOfFailedTasks += 1
-										await alertTeams(JSON.stringify(error.response.data), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+										await alertTeams(JSON.stringify(error.response.data), "error", "syncRecipients", [], jobId, context.functionName)
 										logger.errorException(
 											error,
 											"The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!",
@@ -180,7 +180,7 @@ const getHandleJobs = async (req, context) => {
 										updatedTask.push(data)
 									} catch (innerError) {
 										logger.errorException(innerError, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-										await alertTeams(JSON.stringify(innerError), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+										await alertTeams(JSON.stringify(innerError), "error", "syncRecipients", [], jobId, context.functionName)
 									}
 								}
 							} else if (task.status === "completed") {
@@ -198,7 +198,7 @@ const getHandleJobs = async (req, context) => {
 						})
 					} catch (error) {
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						await alertTeams(JSON.stringify(error), "error", "syncRecipients", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(error), "error", "syncRecipients", [], jobId, context.functionName)
 					}
 				} else if (jobToHandle === "createCaseDocument") {
 					let currentTasks = Object.values(taskArr[0])
@@ -293,7 +293,7 @@ const getHandleJobs = async (req, context) => {
 						}
 					} catch (error) {
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						await alertTeams(JSON.stringify(error), "error", "createCaseDocument", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(error), "error", "createCaseDocument", [], jobId, context.functionName)
 					}
 				} else if (jobToHandle === "uploadAttachments") {
 					// Handle the job
@@ -328,7 +328,7 @@ const getHandleJobs = async (req, context) => {
 									})
 								} catch (error) {
 									logger.errorException(error, "Failed to update the status of: {JobToHandle} with the job id: {JobId}", jobToHandle, jobId)
-									await alertTeams(`Failed to update the status of: ${jobToHandle}`, "error", "uploadAttachments", [], jobId, context.executionContext.functionName)
+									await alertTeams(`Failed to update the status of: ${jobToHandle}`, "error", "uploadAttachments", [], jobId, context.functionName)
 								}
 								throw new Error("Task have failed 7 times or more")
 							}
@@ -415,7 +415,7 @@ const getHandleJobs = async (req, context) => {
 							})
 						}
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						await alertTeams(JSON.stringify(...error), "error", "uploadAttachments", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(...error), "error", "uploadAttachments", [], jobId, context.functionName)
 					}
 				} else if (jobToHandle === "issueDispatch") {
 					let currentTasks = Object.values(taskArr[0])
@@ -453,7 +453,7 @@ const getHandleJobs = async (req, context) => {
 								logger.info("Job updated")
 							} catch (error) {
 								logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-								await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.executionContext.functionName)
+								await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.functionName)
 							}
 						} else {
 							if (!issueDispatchCopy[0].retry) issueDispatchCopy[0].retry = 0
@@ -475,12 +475,12 @@ const getHandleJobs = async (req, context) => {
 								logger.info("Job updated")
 							} catch (error) {
 								logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-								await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.executionContext.functionName)
+								await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.functionName)
 							}
 						}
 					} catch (error) {
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.functionName)
 					}
 				} else if (jobToHandle === "createStatistics") {
 					// Handle the job
@@ -513,7 +513,7 @@ const getHandleJobs = async (req, context) => {
 							logger.info("The job is updated and all tasks is completed! Removing the job from the jobs collection")
 							await Jobs.findOneAndDelete({ _id: jobId })
 							logger.info("The job has successfully been deleted")
-							await alertTeams([], "completed", [], "Job has been completed and removed from the jobs collection", jobId, context.executionContext.functionName)
+							await alertTeams([], "completed", [], "Job has been completed and removed from the jobs collection", jobId, context.functionName)
 						} else {
 							logger.error("Failed pushing statistics to the DB")
 							const filter = { _id: jobId }
@@ -536,11 +536,11 @@ const getHandleJobs = async (req, context) => {
 						}
 					} catch (error) {
 						logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-						await alertTeams(JSON.stringify(error), "error", "createStatistics", [], jobId, context.executionContext.functionName)
+						await alertTeams(JSON.stringify(error), "error", "createStatistics", [], jobId, context.functionName)
 					}
 				} else {
-					logger.error("Did not find any tasks to handle, but for some reason we ended up here? JobID: {JobId}, Endpoint: {FunctionName}", jobId, context.executionContext.functionName)
-					await alertTeams("Did not find any tasks to handle, but for some reason we ended up here?", "error", "Unknown", [], jobId, context.executionContext.functionName)
+					logger.error("Did not find any tasks to handle, but for some reason we ended up here? JobID: {JobId}, Endpoint: {FunctionName}", jobId, context.functionName)
+					await alertTeams("Did not find any tasks to handle, but for some reason we ended up here?", "error", "Unknown", [], jobId, context.functionName)
 				}
 			}
 		}

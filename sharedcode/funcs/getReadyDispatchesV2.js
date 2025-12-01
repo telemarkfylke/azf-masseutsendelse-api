@@ -297,7 +297,7 @@ module.exports = async function getReadyDispatchesV2(context, _req) {
 		})
 
 		logger.info("Successfully updated the dispatch with id: {JobId}", job._id)
-		await alertTeams([], "completed", [], "Jobs have now been created for the dispatch, everything went well", job._id, context.executionContext.functionName)
+		await alertTeams([], "completed", [], "Jobs have now been created for the dispatch, everything went well", job._id, context.functionName)
 	}
 
 	return response(updatedDispatch)
