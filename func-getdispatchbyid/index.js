@@ -5,7 +5,7 @@ const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-const getDispatchesById = async (req) => {
+const getDispatchById = async (req) => {
 	try {
 		// Authentication / Authorization
 		await require("../sharedcode/auth/auth").auth(req)
@@ -36,11 +36,11 @@ const getDispatchesById = async (req) => {
 	}
 }
 
-app.http("getDispatchesById", {
+app.http("getDispatchById", {
 	authLevel: "anonymous",
-	handler: getDispatchesById,
+	handler: getDispatchById,
 	methods: ["GET"],
 	route: "dispatches/{id}"
 })
 
-module.exports = { getDispatchesById }
+module.exports = { getDispatchById }

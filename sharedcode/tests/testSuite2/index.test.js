@@ -1,10 +1,10 @@
 // Endpoints
 const { postTemplate } = require("../../../func-posttemplate/index")
-const { getTemplatesById } = require("../../../func-gettemplatesbyid/index")
+const { getTemplateById } = require("../../../func-gettemplatebyid/index")
 const { getTemplates } = require("../../../func-gettemplates/index")
 const { putTemplates } = require("../../../func-puttemplates/index")
 const { postDispatches } = require("../../../func-postdispatches/index")
-const { getDispatchesById } = require("../../../func-getdispatchesbyid/index")
+const { getDispatchById } = require("../../../func-getdispatchbyid/index")
 // const { getDispatches } = require('../../../func-getdispatches/index')
 const { editDispatches } = require("../../../func-editdispatches/index")
 // const { getReadyDispatches } = require('../../../func-getreadydispatches/index')
@@ -143,7 +143,7 @@ describe("Endpoint testing", () => {
 					return {}
 				}
 			}
-			const get = await getTemplatesById(request, context)
+			const get = await getTemplateById(request, context)
 
 			expect(get).resolves
 			expect(get).toBeTruthy()
@@ -261,7 +261,7 @@ describe("Endpoint testing", () => {
 		//     id: idDispatch
 		//   }
 
-		//   const get = await getDispatchesById(apikeyHeader, contextModified)
+		//   const get = await getDispatchById(apikeyHeader, contextModified)
 
 		//   expect(get).resolves
 		//   expect(get).toBeTruthy()
@@ -573,7 +573,7 @@ describe("Endpoint testing", () => {
 				}
 			}
 
-			const get = await getDispatchesById(request, context)
+			const get = await getDispatchById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.jsonBody).toBeDefined()
@@ -591,7 +591,7 @@ describe("Endpoint testing", () => {
 				}
 			}
 
-			const get = await getDispatchesById(request, context)
+			const get = await getDispatchById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.jsonBody).toBeDefined()
@@ -839,7 +839,7 @@ describe("Endpoint testing", () => {
 				}
 			}
 
-			const get = await getTemplatesById(request, context)
+			const get = await getTemplateById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.jsonBody).toBeDefined()
@@ -857,7 +857,7 @@ describe("Endpoint testing", () => {
 				}
 			}
 
-			const get = await getTemplatesById(request, context)
+			const get = await getTemplateById(request, context)
 
 			expect(get).toBeInstanceOf(Object)
 			expect(get.jsonBody).toBeDefined()

@@ -5,7 +5,7 @@ const Templates = require("../sharedcode/models/templates.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
-const getTemplatesById = async (req) => {
+const getTemplateById = async (req) => {
 	try {
 		// Authentication / Authorization
 		await require("../sharedcode/auth/auth").auth(req)
@@ -37,11 +37,11 @@ const getTemplatesById = async (req) => {
 	}
 }
 
-app.http("getTemplatesById", {
+app.http("getTemplateById", {
 	authLevel: "anonymous",
-	handler: getTemplatesById,
+	handler: getTemplateById,
 	methods: ["GET"],
 	route: "templates/{id}"
 })
 
-module.exports = { getTemplatesById }
+module.exports = { getTemplateById }
