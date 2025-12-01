@@ -27,8 +27,7 @@ const getTemplateById = async (req) => {
 		}
 
 		// Return the template object
-		const requestBody = await req.json()
-		const templateById = await Templates.findById(id, requestBody, { new: true })
+		const templateById = await Templates.findById(id, {}, { new: true })
 
 		return response(templateById)
 	} catch (err) {

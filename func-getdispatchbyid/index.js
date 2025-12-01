@@ -26,8 +26,7 @@ const getDispatchById = async (req) => {
 		}
 
 		// Return the dispatch object
-		const requestBody = await req.json()
-		const dispatchById = await Dispatches.findById(id, requestBody, { new: true })
+		const dispatchById = await Dispatches.findById(id, {}, { new: true })
 
 		return response(dispatchById)
 	} catch (err) {
