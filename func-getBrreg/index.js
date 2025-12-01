@@ -1,5 +1,6 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
+const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const getBRReg = async (req) => {
@@ -13,20 +14,25 @@ const getBRReg = async (req) => {
 	}
 
 	// Make the request
-	const response = await fetch(`https://data.brreg.no/enhetsregisteret/api/enheter/${id}`, {
+	const responseRequest = await fetch(`https://data.brreg.no/enhetsregisteret/api/enheter/${id}`, {
 		method: "GET",
 		headers: {
 			Accept: "application/json"
 		}
 	})
 
-	if (!response.ok) {
-		const errorData = await response.text()
-		logger.error("Failed to get data for EnhetId {EnhetId} from BRReg. Status: {Status}: {StatusText}: {@ErrorData}", id, response.status, response.statusText, errorData)
-		return new HTTPError(response.status, `BRReg responded with status code ${response.status} for id ${id}: ${response.statusText}`).toHTTPResponse()
+	if (!responseRequest.ok) {
+		const errorData = await responseRequest.text()
+		logger.error("Failed to get data for EnhetId {EnhetId} from BRReg. Status: {Status}: {StatusText}: {@ErrorData}", id, responseRequest.status, responseRequest.statusText, errorData)
+		return new HTTPError(responseRequest.status, `BRReg responded with status code ${responseRequest.status} for id ${id}: ${responseRequest.statusText}`).toHTTPResponse()
 	}
 
-	return await response.json()
+	try {
+		return response(await responseRequest.json())
+	} catch (err) {
+		logger.errorException(err, "Failed to parse BRReg response for EnhetId {EnhetId}", id)
+		return errorResponse(err, `Failed to parse BRReg response for EnhetId ${id}`, 500)
+	}
 }
 
 app.http("getBRReg", {
