@@ -106,7 +106,7 @@ const retrieveAttachments = async (dispatch) => {
 	return attachments
 }
 
-module.exports = async function getReadyDispatchesV2(context, _req) {
+const getReadyDispatchesV2 = async (_req, context) => {
 	// Arrays
 	const dispatchJobs = []
 
@@ -302,3 +302,5 @@ module.exports = async function getReadyDispatchesV2(context, _req) {
 
 	return response(updatedDispatch)
 }
+
+module.exports = { getReadyDispatchesV2 }

@@ -6,7 +6,7 @@ const { errorResponse } = require("../sharedcode/response/response-handler")
 
 const getReadyDispatches = async (req, context) => {
 	try {
-		return await getReadyDispatchesV2(context, req)
+		return await getReadyDispatchesV2(req, context)
 	} catch (err) {
 		await alertTeams(err, "error", "func-getreadydispatchesV2Dev failed", [], "no id found", context.functionName)
 		logger.errorException(err, "Failed to get ready dispatches V2 (Dev)")
