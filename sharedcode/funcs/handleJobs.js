@@ -97,8 +97,8 @@ const handleJobs = async (context, runStatus) => {
 				if (((job === "createCaseDocument" || job === "issueDispatch" || job === "uploadAttachments") && stopHandling === true) || (job === "issueDispatch" && stopHandling === true)) {
 					await alertTeams(`Current job: ${job} and stopHandling is: ${stopHandling}. DispatchID: ${jobId}. You need to look into it!`)
 				} else {
-					logger.info("Pushing the tasks to the task array.")
 					const jobsObj = { [job]: jobs.tasks[job] }
+					logger.info("Pushing task to the task array for Job: {@Job}", job)
 					taskArr.push(jobsObj)
 				}
 			}

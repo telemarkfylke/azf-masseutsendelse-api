@@ -242,7 +242,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 			// Create one uploadDocuments-job pr. Attachment
 			let fileIndex = -1
 			for (const file of dispatchFiles) {
-				logger.info("Creating the archive uploadDocuments task, for attachment: {FileTitle} with dispatchID: {DispatchId}", file.title, dispatch._id)
+				logger.info("Creating the archive uploadDocuments task, for attachment: {FileTitle} ({FileFormat}) with dispatchID: {DispatchId}", file.title, file.format, dispatch._id)
 				fileIndex++
 				if (fileIndex === 0) continue
 				dispatchJob.tasks.uploadAttachments.push({
