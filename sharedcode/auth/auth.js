@@ -11,7 +11,8 @@ const azuread = require("./lib/azuread")
  * @returns
  */
 async function auth(req) {
-	if (!req.headers.authorization) {
+	const authValue = req.headers.get("authorization") || req.headers.get("Authorization")
+	if (!authValue) {
 		return {
 			name: "timetrigger",
 			id: "timetrigger",
@@ -20,7 +21,7 @@ async function auth(req) {
 		}
 	}
 
-	const token = await azuread(req.headers.authorization)
+	const token = await azuread(authValue)
 	if (!token) {
 		return {}
 	}
