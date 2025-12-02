@@ -7,6 +7,7 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
 	if (!failedTask) throw new Error("failedTasks must be provided")
 	if (!completedJob) throw new Error("completedJob must be provided")
 	if (typeof color !== "string") throw new Error("Color must be of type string")
+	if (!MS.TEAMS_ALERTS_WEBHOOK_URL) { return; }
 
 	color = color === "error" ? "a80c0c" : "1ea80c"
 
