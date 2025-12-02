@@ -6,6 +6,7 @@ const { app } = require("@azure/functions")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 const { MATRIKKEL } = require("../config")
 const getAccessToken = require("../sharedcode/helpers/get-entraid-token")
+const { response } = require("../sharedcode/response/response-handler");
 
 const getMatrikkel = async (req) => {
 	// Authentication / Authorization
@@ -29,24 +30,23 @@ const getMatrikkel = async (req) => {
 
 	// Get ID from request
 	const endpoint = decodeURIComponent(req.params.endpoint)
-	// TODO: Could we perhaps use req.text() directly instead of parsing and then re-stringifying?
-	const requestBody = await req.json()
-	const response = await fetch(`${MATRIKKEL.MATRIKKEL_BASEURL}/${endpoint}`, {
+	const requestBody = await req.text()
+	const responseRequest = await fetch(`${MATRIKKEL.MATRIKKEL_BASEURL}/${endpoint}`, {
 		method: "POST",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			"x-functions-key": MATRIKKEL.MATRIKKEL_KEY
 		},
-		body: JSON.stringify(requestBody)
+		body: requestBody
 	})
 
-	if (!response.ok) {
-		const errorData = await response.text()
-		logger.error("Failed to POST to MatrikkelProxyAPI Endpoint {Endpoint}, Status: {Status}: {StatusText}: {@ErrorData}", endpoint, response.status, response.statusText, errorData)
-		return new HTTPError(response.status, `MatrikkelProxyAPI responded with status ${response.status}: ${response.statusText}`).toHTTPResponse()
+	if (!responseRequest.ok) {
+		const errorData = await responseRequest.text()
+		logger.error("Failed to POST to MatrikkelProxyAPI Endpoint {Endpoint}, Status: {Status}: {StatusText}: {@ErrorData}", endpoint, responseRequest.status, responseRequest.statusText, errorData)
+		return new HTTPError(responseRequest.status, `MatrikkelProxyAPI responded with status ${responseRequest.status}: ${responseRequest.statusText}`).toHTTPResponse()
 	}
 
-	return await response.json()
+	return response(await responseRequest.json())
 }
 
 app.http("getMatrikkel", {
