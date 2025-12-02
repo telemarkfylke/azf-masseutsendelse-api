@@ -1,5 +1,6 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
+const { ARCHIVE } = require("../config")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
@@ -20,6 +21,21 @@ const getDispatches = async (req) => {
 		// If no dispatches was found
 		if (!dispatches) {
 			return response([])
+		}
+
+		if (ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL) {
+			const dispatchesWithArchiveUrl = dispatches.map((dispatch) => {
+				if (dispatch.archiveUrl.includes("https://")) {
+					return dispatch
+				}
+
+				const archiveShowDispatchUrl = ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL.endsWith("/") ? ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL.slice(0, -1) : `${ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL}`
+				const archiveUrl = dispatch.archiveUrl.startsWith("/") ? dispatch.archiveUrl.slice(1) : dispatch.archiveUrl
+				dispatch.archiveUrl = `${archiveShowDispatchUrl}/${archiveUrl}`
+				return dispatch
+			})
+
+			return response(dispatchesWithArchiveUrl)
 		}
 
 		// Return the dispatches
