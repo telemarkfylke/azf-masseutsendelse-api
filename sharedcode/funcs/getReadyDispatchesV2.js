@@ -177,7 +177,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 		// Retrieve any attachments if applicable
 		const attachments = await retrieveAttachments(dispatch)
 		if (attachments.length > 0) {
-			dispatchFiles.push(attachments)
+			dispatchFiles.push(...attachments)
 		}
 
 		// Create the archive task
