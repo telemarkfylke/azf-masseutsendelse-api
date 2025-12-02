@@ -422,7 +422,7 @@ const handleJobs = async (context, runStatus) => {
 						})
 					}
 					logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
-					await alertTeams(JSON.stringify(...error), "error", "uploadAttachments", [], jobId, context.functionName)
+					await alertTeams(JSON.stringify(error), "error", "uploadAttachments", [], jobId, context.functionName)
 				}
 			} else if (jobToHandle === "issueDispatch") {
 				let currentTasks = Object.values(taskArr[0])
