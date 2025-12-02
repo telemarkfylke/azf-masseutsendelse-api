@@ -32,10 +32,10 @@ const generatePdfFromTemplate = async (dispatch) => {
 	// Generate PDF from template
 	const legalFilename = dispatch.title.replace(/[/\\?%*:|"<>;¤]/g, "")
 	logger.info("Making the request to the PDF api")
-	const response = await fetch(PDF_GENERATOR.PDFGENERATOR_ENDPOINT, {
+	const response = await fetch(PDF_GENERATOR.PDF_GENERATOR_ENDPOINT, {
 		method: "POST",
 		headers: {
-			"x-functions-key": PDF_GENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
+			"x-functions-key": PDF_GENERATOR.PDF_GENERATOR_X_FUNCTIONS_KEY
 		},
 		body: JSON.stringify(pdfRequestBody)
 	})

@@ -36,11 +36,11 @@ const generatePDF = async (req) => {
 
 	// Define headers
 	const headers = {
-		"x-functions-key": PDF_GENERATOR.PDFGENERATOR_X_FUNCTIONS_KEY
+		"x-functions-key": PDF_GENERATOR.PDF_GENERATOR_X_FUNCTIONS_KEY
 	}
 
 	// Make the request
-	const responseRequest = await fetch(PDF_GENERATOR.PDFGENERATOR_ENDPOINT, {
+	const responseRequest = await fetch(PDF_GENERATOR.PDF_GENERATOR_ENDPOINT, {
 		method: "POST",
 		headers,
 		body: JSON.stringify(requestData)
