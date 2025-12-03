@@ -48,11 +48,12 @@ const generatePDF = async (req) => {
 
 	if (!responseRequest.ok) {
 		const errorData = await responseRequest.text()
-		logger.error("Failed to create a pdf. Status: {Status}: {StatusText}: {@ErrorData}", responseRequest.status, responseRequest.statusText, errorData)
+		logger.error("Failed to create a PDF. Status: {Status}: {StatusText}: {@ErrorData}", responseRequest.status, responseRequest.statusText, errorData)
 		return new HTTPError(responseRequest.status, `Error from PDF Generator: ${responseRequest.statusText}`).toHTTPResponse()
 	}
 
 	const responseData = await responseRequest.json()
+	logger.info("Generated a PDF from Template {Template}", template)
 
 	return response(responseData)
 }

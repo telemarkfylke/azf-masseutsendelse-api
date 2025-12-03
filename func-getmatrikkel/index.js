@@ -46,7 +46,9 @@ const getMatrikkel = async (req) => {
 		return new HTTPError(responseRequest.status, `MatrikkelProxyAPI responded with status ${responseRequest.status}: ${responseRequest.statusText}`).toHTTPResponse()
 	}
 
-	return response(await responseRequest.json())
+	const matrikkelData = await responseRequest.json()
+	logger.info("Successfully fetched data from MatrikkelProxyAPI Endpoint {Endpoint}", endpoint)
+	return response(matrikkelData)
 }
 
 app.http("getMatrikkel", {

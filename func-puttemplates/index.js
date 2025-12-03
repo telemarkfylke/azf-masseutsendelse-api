@@ -34,7 +34,8 @@ const putTemplates = async (req) => {
 		// Get the existing record
 		const existingTemplate = await Templates.findById(id).lean()
 		if (!existingTemplate) {
-			return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
+			logger.error("Template with Id {Id} could not be found", id)
+			return new HTTPError(400, `Template with id ${id} could not be found`).toHTTPResponse()
 		}
 
 		// Increment the version number
@@ -43,6 +44,7 @@ const putTemplates = async (req) => {
 		// Update the template
 		const updatedTemplate = await Templates.findByIdAndUpdate(id, requestBody, { new: true })
 
+		logger.info("Returning updated template with Id {Id}", id)
 		return response(updatedTemplate)
 	} catch (err) {
 		logger.errorException(err, "Failed to put templates")

@@ -35,7 +35,7 @@ const handleJobs = async (context, runStatus) => {
 		})
 		// Handle if no jobs.
 		if (!jobs) {
-			logger.info("No jobs to handle found, exit")
+			logger.info("No jobs found to handle, exit")
 			// await alertTeams([], 'completed', [] , 'job', context.functionName)
 			// error: any, color: any, failedTask: any, completedJob: any, jobId: any, endpoint: any
 			// await alertTeams({error: 'noe gikk galt!!!'}, 'error', 'failed task' , [], undefined, context.functionName)
@@ -95,6 +95,7 @@ const handleJobs = async (context, runStatus) => {
 			// Find the job
 			if (status === "waiting" || status === "inprogress") {
 				if (((job === "createCaseDocument" || job === "issueDispatch" || job === "uploadAttachments") && stopHandling === true) || (job === "issueDispatch" && stopHandling === true)) {
+					logger.error("The job: {Job} with mongoDB id: {JobId} cannot be handled because a StopHandling is true ({StopHandling})", job, jobId, stopHandling)
 					await alertTeams(`Current job: ${job} and stopHandling is: ${stopHandling}. DispatchID: ${jobId}. You need to look into it!`)
 				} else {
 					const jobsObj = { [job]: jobs.tasks[job] }
@@ -126,14 +127,15 @@ const handleJobs = async (context, runStatus) => {
 						const method = task.method
 						const doc = await Jobs.findOne({ _id: jobId })
 						if (!doc) {
-							logger.error("Current Job: {JobToHandle}, no job found.", jobToHandle)
+							logger.error("Current Job: {JobToHandle}, no job document found.", jobToHandle)
 							throw new Error("Document not found")
 						}
+
 						const currentTaskIndex = doc.tasks.syncRecipients.findIndex((task) => task.ssn === ssn)
-						logger.info("Working with the task with index: {CurrentTaskIndex}.", currentTaskIndex)
+						logger.info("Working with task with index: {CurrentTaskIndex}.", currentTaskIndex)
 						if (task.status === "waiting" || task.status === "inprogress" || task.status === "failed") {
 							if (task.status === "failed" && task.retry === 7) {
-								logger.error("The task with index: {CurrentTaskIndex} have failed 7 times. Whole job is set to failed", currentTaskIndex)
+								logger.error("The task with index: {CurrentTaskIndex} have failed {TaskRetry} times. Whole job is set to failed", currentTaskIndex, task.retry)
 								const filter = { _id: jobId }
 								const update = {
 									"status.syncRecipients": "failed"
@@ -164,7 +166,7 @@ const handleJobs = async (context, runStatus) => {
 								try {
 									logger.info("Handling the failed task, updating")
 									numbOfFailedTasks += 1
-									await alertTeams(JSON.stringify(error.response.data), "error", "syncRecipients", [], jobId, context.functionName)
+									await alertTeams(JSON.stringify(error.response?.data || error), "error", "syncRecipients", [], jobId, context.functionName)
 									logger.errorException(
 										error,
 										"The job: {Job} with mongoDB id: {JobId} failed. Task with the index {CurrentTaskIndex} failed. Check the teams warning for more info!",
@@ -177,10 +179,10 @@ const handleJobs = async (context, runStatus) => {
 										doc.tasks.syncRecipients[currentTaskIndex].retry += 1
 									}
 									const errorObj = {
-										msg: error.response.data,
+										msg: error.response?.data || error,
 										retry: doc.tasks.syncRecipients[currentTaskIndex]?.retry ? doc.tasks.syncRecipients[currentTaskIndex].retry : 1
 									}
-									logger.info("Task with the index: {CurrentTaskIndex} is set to failed", currentTaskIndex)
+									logger.warn("Task with the index: {CurrentTaskIndex} is set to failed with ErrorObj: {@ErrorObj}", currentTaskIndex, errorObj)
 									doc.tasks.syncRecipients[currentTaskIndex].status = "failed"
 									const data = Object.assign({}, doc.tasks.syncRecipients[currentTaskIndex], errorObj)
 									// Update the correct object with status "failed" and with the data.
@@ -213,7 +215,7 @@ const handleJobs = async (context, runStatus) => {
 				const doc = await Jobs.findOne({ _id: jobIdObj })
 				// Handle doc if not found
 				if (!doc) {
-					logger.error("Current Job: {JobToHandle}, no job found.", jobToHandle)
+					logger.error("Current Job: {JobToHandle}, no job document found.", jobToHandle)
 					throw new Error("Document not found")
 				}
 				// Current case we're working with.
@@ -309,7 +311,7 @@ const handleJobs = async (context, runStatus) => {
 				const doc = await Jobs.findOne({ _id: jobId })
 				// Handle doc if not found
 				if (!doc) {
-					logger.error("Current Job: {JobToHandle}, no job found.", jobToHandle)
+					logger.error("Current Job: {JobToHandle}, no job document found.", jobToHandle)
 					throw new Error("Document not found")
 				}
 				// Array of attachments that needs the documentNumber returned from the createCaseDocument Job.
@@ -382,18 +384,18 @@ const handleJobs = async (context, runStatus) => {
 					logger.info("Number of attachments: {AttachmentCount}, attachments added: {CompletedTasks}", attachments.length, completedTasks)
 
 					// Push the changes to the DB
-					logger.info("Updating the changes made to the job")
+					logger.info("Updating the changes made to the job with JobId: {JobId}", jobId)
 					const filter = { _id: jobId }
 					const update = {
 						"tasks.issueDispatch": issueDispatchCopy,
 						"status.uploadAttachments": attachments.length === completedTasks ? "completed" : "inprogress",
 						"tasks.uploadAttachments": attachments
 					}
-					logger.info("Finding the job and updating the job")
+					logger.info("Finding the job and updating the job with JobId {JobId}", jobId)
 					await Jobs.findOneAndUpdate(filter, update, {
 						new: true
 					})
-					logger.info("The job have been updated")
+					logger.info("The job with JobId {JobId} have been updated", jobId)
 				} catch (error) {
 					currentTasks[currentTaskIndex].status = "failed"
 					if (currentTasks[currentTaskIndex].retry) {
@@ -430,7 +432,7 @@ const handleJobs = async (context, runStatus) => {
 				const doc = await Jobs.findOne({ _id: jobId })
 				// Handle doc if not found
 				if (!doc) {
-					logger.error("Current Job: {JobToHandle}, no job found.", jobToHandle)
+					logger.error("Current Job: {JobToHandle}, no job document found.", jobToHandle)
 					throw new Error("Document not found")
 				}
 				const issueDispatchCopy = doc.tasks.issueDispatch
@@ -453,11 +455,11 @@ const handleJobs = async (context, runStatus) => {
 								"status.issueDispatch": "completed",
 								"tasks.issueDispatch": issueDispatchCopy
 							}
-							logger.info("Updating the job")
+							logger.info("Updating the job with JobId: {JobId}", jobId)
 							await Jobs.findOneAndUpdate(filter, update, {
 								new: true
 							})
-							logger.info("Job updated")
+							logger.info("Job with JobId {JobId} updated", jobId)
 						} catch (error) {
 							logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
 							await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.functionName)
@@ -475,11 +477,11 @@ const handleJobs = async (context, runStatus) => {
 								"status.issueDispatch": issueDispatchCopy[0].retry >= 7 ? "failed" : "waiting",
 								"tasks.issueDispatch": issueDispatchCopy
 							}
-							logger.info("Updating the job")
+							logger.info("Updating the job with JobId: {JobId}", jobId)
 							await Jobs.findOneAndUpdate(filter, update, {
 								new: true
 							})
-							logger.info("Job updated")
+							logger.info("Job with JobId {JobId} updated", jobId)
 						} catch (error) {
 							logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)
 							await alertTeams(JSON.stringify(error), "error", "issueDispatch", [], jobId, context.functionName)
@@ -494,7 +496,7 @@ const handleJobs = async (context, runStatus) => {
 				try {
 					const DispatchDoc = await Dispatches.findOne({ _id: jobId })
 					const jobDoc = await Jobs.findOne({ _id: jobId })
-					logger.info("Creating statistics")
+					logger.info("Creating statistics for job with JobId: {JobId}", jobId)
 					const privatepersons = jobDoc.tasks.syncRecipients.filter((t) => t.method === "SyncPrivatePerson").length
 					const enterprises = jobDoc.tasks.syncRecipients.filter((t) => t.method === "SyncEnterprise").length
 					logger.info("Pushing statistics to the DB")
@@ -513,13 +515,13 @@ const handleJobs = async (context, runStatus) => {
 								}
 							]
 						}
-						logger.info("Updating the job")
+						logger.info("Updating the job with JobId: {JobId} as completed", jobId)
 						await Jobs.findOneAndUpdate(filter, update, {
 							new: true
 						})
-						logger.info("The job is updated and all tasks is completed! Removing the job from the jobs collection")
+						logger.info("The job with JobId {JobId} is updated and all tasks is completed! Removing the job from the jobs collection", jobId)
 						await Jobs.findOneAndDelete({ _id: jobId })
-						logger.info("The job has successfully been deleted")
+						logger.info("The job with JobId {JobId} has successfully been deleted", jobId)
 						await alertTeams([], "completed", [], "Job has been completed and removed from the jobs collection", jobId, context.functionName)
 					} else {
 						logger.error("Failed pushing statistics to the DB")
@@ -535,11 +537,11 @@ const handleJobs = async (context, runStatus) => {
 								}
 							]
 						}
-						logger.info("Updating the job")
+						logger.info("Updating the job with JobId: {JobId} as failed", jobId)
 						await Jobs.findOneAndUpdate(filter, update, {
 							new: true
 						})
-						logger.info("Job updated")
+						logger.info("Job with JobId {JobId} updated", jobId)
 					}
 				} catch (error) {
 					logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId)

@@ -120,21 +120,22 @@ const editDispatches = async (req) => {
 
 			// Upload attachments if applicable
 			if (process.env.NODE_ENV !== "test")
-				attachmentsToAdd.forEach(async (i) => {
+				for (const i of attachmentsToAdd) {
 					await blobClient.save(`${id}/${i.name}`, i.data)
-				})
+				}
 			// Remove attachments if applicable
 			if (process.env.NODE_ENV !== "test")
-				attachmentsToRemove.forEach(async (i) => {
+				for (const i of attachmentsToRemove) {
 					await blobClient.remove(`${id}/${i}`)
-				})
+				}
 		}
 
+		logger.info("Dispatch with Id {Id} has been edited by {User}", id, requestor.email)
 		// Return the dispatch
 		return response(updatedDispatch)
 	} catch (err) {
-		logger.errorException(err, "Failed to put edit dispatches")
-		return errorResponse(err, "Failed to put edit dispatches", 400)
+		logger.errorException(err, "Failed to edit dispatches")
+		return errorResponse(err, "Failed to edit dispatches", 400)
 	}
 }
 

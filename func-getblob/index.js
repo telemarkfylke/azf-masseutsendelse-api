@@ -21,10 +21,12 @@ const getBlob = async (req) => {
 		if (process.env.NODE_ENV !== "test") {
 			const file = await blobClient.get(`${req.params.id}/${req.params.name}`)
 			if (!file || !file.data) {
+				logger.error("No files found for DispatchId: {DispatchId} and Filename: {Filename}", req.params.id, req.params.name)
 				return new HTTPError(404, "No files found, check if you passed the right filename and/or the right dispatchId").toHTTPResponse()
 			}
 
 			// Return the file
+			logger.info("Retrieved blob for DispatchId: {DispatchId} and Filename: {Filename}", req.params.id, req.params.name)
 			return response(file)
 		}
 

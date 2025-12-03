@@ -22,10 +22,12 @@ const completeDispatch = async (req) => {
 		// Get the existing dispatch object
 		const existingDispatch = await Dispatches.findById(id).lean()
 		if (!existingDispatch) {
+			logger.error("Dispatch with Id {Id} could not be found", id)
 			return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse()
 		}
 		if (existingDispatch.status !== "approved") {
-			return new HTTPError(404, "Cannot complete a dispatch that is not approved").toHTTPResponse()
+			logger.error("Dispatch with Id {Id} cannot be completed since it's not approved ({Status})", id, existingDispatch.status)
+			return new HTTPError(400, "Cannot complete a dispatch that is not approved").toHTTPResponse()
 		}
 
 		// Set completed information
@@ -46,6 +48,7 @@ const completeDispatch = async (req) => {
 
 		// Update the dispatch
 		const updatedDispatch = await Dispatches.findByIdAndUpdate(id, completedData, { new: true })
+		logger.info("Dispatch with Id {Id} has been completed by {User}", id, requestor.email)
 
 		return response(updatedDispatch)
 	} catch (err) {

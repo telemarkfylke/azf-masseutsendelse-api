@@ -23,11 +23,13 @@ const getTemplateById = async (req) => {
 		// Find Template by ID
 		const template = await Templates.findById(id)
 		if (!template) {
-			return new HTTPError(400, `Template with id ${id} could no be found`).toHTTPResponse()
+			logger.error("Template with Id {Id} could not be found", id)
+			return new HTTPError(400, `Template with id ${id} could not be found`).toHTTPResponse()
 		}
 
 		// Return the template object
 		const templateById = await Templates.findById(id, {}, { new: true })
+		logger.info("Returning template with Id {Id}", id)
 
 		return response(templateById)
 	} catch (err) {

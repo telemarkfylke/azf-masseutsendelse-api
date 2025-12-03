@@ -41,7 +41,7 @@ const postTemplate = async (req) => {
 		// Save the template to the database
 		const result = await template.save()
 
-		// Return the result
+		logger.info("Successfully created new template by {User}", requestor.email)
 		return response(result)
 	} catch (err) {
 		logger.errorException(err, "Failed to post template")

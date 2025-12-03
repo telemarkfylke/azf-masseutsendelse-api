@@ -16,10 +16,11 @@ const getTemplates = async (req) => {
 		// Find all the templates
 		const templates = await Templates.find({})
 		if (!templates) {
-			return new HTTPError(404, "No templates found in the databases").toHTTPResponse()
+			logger.error("No templates found in the database")
+			return new HTTPError(404, "No templates found in the database").toHTTPResponse()
 		}
 
-		// Return the Templates
+		logger.info("Returning {TemplateCount} templates", templates.length)
 		return response(templates)
 	} catch (err) {
 		logger.errorException(err, "Failed to get templates")

@@ -99,6 +99,7 @@ const postDispatches = async (req) => {
 			}
 		}
 
+		logger.info("Successfully created new dispatch by {User}", requestor.email)
 		return response(results)
 	} catch (err) {
 		logger.errorException(err, "Failed to post dispatches")

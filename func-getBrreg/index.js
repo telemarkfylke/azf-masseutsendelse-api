@@ -28,7 +28,10 @@ const getBRReg = async (req) => {
 	}
 
 	try {
-		return response(await responseRequest.json())
+		const responseData = await responseRequest.json()
+		logger.info("Fetched data for EnhetId {EnhetId} from BRReg", id)
+
+		return response(responseData)
 	} catch (err) {
 		logger.errorException(err, "Failed to parse BRReg response for EnhetId {EnhetId}", id)
 		return errorResponse(err, `Failed to parse BRReg response for EnhetId ${id}`, 500)

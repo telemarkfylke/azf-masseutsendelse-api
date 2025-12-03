@@ -35,10 +35,11 @@ const getDispatches = async (req) => {
 				return dispatch
 			})
 
+			logger.info("Returning {DispatchCount} dispatches", dispatchesWithArchiveUrl.length)
 			return response(dispatchesWithArchiveUrl)
 		}
 
-		// Return the dispatches
+		logger.info("Returning {DispatchCount} dispatches", dispatches.length)
 		return response(dispatches)
 	} catch (err) {
 		logger.errorException(err, "Failed to get dispatches")

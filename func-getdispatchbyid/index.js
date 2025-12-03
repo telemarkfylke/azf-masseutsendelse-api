@@ -22,13 +22,12 @@ const getDispatchById = async (req) => {
 		// Find Dispatch by ID
 		const dispatch = await Dispatches.findById(id)
 		if (!dispatch) {
-			return new HTTPError(404, `Dispatch with id ${id} could no be found`).toHTTPResponse()
+			logger.error("Dispatch with Id {Id} could not be found", id)
+			return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse()
 		}
 
-		// Return the dispatch object
-		const dispatchById = await Dispatches.findById(id, {}, { new: true })
-
-		return response(dispatchById)
+		logger.info("Found dispatch with Id {Id}", id)
+		return response(dispatch)
 	} catch (err) {
 		logger.errorException(err, "Failed to get dispatches by id")
 		return errorResponse(err, "Failed to get dispatches by id", 400)

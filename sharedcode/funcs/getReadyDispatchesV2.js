@@ -42,12 +42,12 @@ const generatePdfFromTemplate = async (dispatch) => {
 
 	if (!response.ok) {
 		const errorData = await response.text()
-		logger.error("Failed to create a pdf from the template: {LegalFilename}, Status: {Status}: {StatusText}: {@ErrorData}", legalFilename, response.status, response.statusText, errorData)
+		logger.error("Failed to create a PDF from the template: {Filename}, Status: {Status}: {StatusText}: {@ErrorData}", legalFilename, response.status, response.statusText, errorData)
 		throw new HTTPError(response.status, `Could not generate PDF for dispatch ${dispatch.title}`)
 	}
 
 	const responseData = await response.json()
-	logger.info("Successfully created a pdf from the template: {LegalFilename}", legalFilename)
+	logger.info("Successfully created a PDF from the template: {Filename}", legalFilename)
 
 	return {
 		title: legalFilename,
@@ -141,7 +141,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 
 		// If true, registration threshold check will be skipped and jobs will be created.
 		if (!MISC.BYPASS_REGISTRATION_THRESHOLD) {
-			logger.info("Checking registration threshold, will create jobs if it is passed.")
+			logger.info("Checking registration threshold, will create job if it is passed.")
 			if (dayjs(new Date()).isBefore(registrationThreshold)) continue
 		}
 
@@ -183,7 +183,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 		// Create the archive task
 		const personArray = []
 		const businessArray = []
-		logger.info("Creating the archive task, for dispatchID: {DispatchId}", dispatch._id)
+		logger.info("Creating the archive task, for DispatchId: {DispatchId}", dispatch._id)
 		for (const owner of dispatch.owners) {
 			if (owner._type.toLowerCase().includes("juridisk")) {
 				businessArray.push({
@@ -196,7 +196,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 			}
 		}
 
-		logger.info("Creating the task to sync recipients in archive, for dispatchID: {DispatchId}", dispatch._id)
+		logger.info("Creating the task to sync recipients in archive, for DispatchId: {DispatchId}", dispatch._id)
 		// Create tasks for create/update private persons
 		personArray.forEach((person) => {
 			dispatchJob.tasks.syncRecipients.push({
@@ -215,7 +215,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 				ssn: business.orgnr
 			})
 		})
-		logger.info("Creating the archive caseDocument task, for dispatchID: {DispatchId}", dispatch._id)
+		logger.info("Creating the archive caseDocument task, for DispatchId: {DispatchId}", dispatch._id)
 		// Create the p360 caseDocument
 		dispatchJob.tasks.createCaseDocument.push({
 			method: "archive",
@@ -242,7 +242,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 			// Create one uploadDocuments-job pr. Attachment
 			let fileIndex = -1
 			for (const file of dispatchFiles) {
-				logger.info("Creating the archive uploadDocuments task, for attachment: {FileTitle} ({FileFormat}) with dispatchID: {DispatchId}", file.title, file.format, dispatch._id)
+				logger.info("Creating the archive uploadDocuments task, for attachment: {FileTitle} ({FileFormat}) with DispatchId: {DispatchId}", file.title, file.format, dispatch._id)
 				fileIndex++
 				if (fileIndex === 0) continue
 				dispatchJob.tasks.uploadAttachments.push({
@@ -263,7 +263,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 		}
 
 		// Create task to send to each contact
-		logger.info("Creating the archive issueDispatch task, for dispatchID: {DispatchId}", dispatch._id)
+		logger.info("Creating the archive issueDispatch task, for DispatchId: {DispatchId}", dispatch._id)
 		dispatchJob.tasks.issueDispatch.push({
 			dataMapping: '{"parameter": { "Documents": [ { "DocumentNumber": "{{DocumentNumber}}" }]}}',
 			data: {
@@ -282,7 +282,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
 		const job = new Jobs(...dispatchJobs)
 		// Save the new dispatch to the database
 		await job.save()
-		logger.info("Successfully saved the job to the Jobs collection with the id: {JobId}", job._id)
+		logger.info("Successfully saved the job to the Jobs collection with the JobId: {JobId}", job._id)
 		// Set dispatch to completed and wipe data that is not needed.
 		const filter = { _id: job._id }
 		const update = {
@@ -291,12 +291,12 @@ const getReadyDispatchesV2 = async (_req, context) => {
 			excludedOwners: [],
 			matrikkelUnitsWithoutOwners: []
 		}
-		logger.info("Updating and wiping the dispatch with id: {JobId} for personal information", job._id)
+		logger.info("Updating and wiping the dispatch with JobId: {JobId} for personal information", job._id)
 		updatedDispatch = await Dispatches.findOneAndUpdate(filter, update, {
 			new: true
 		})
 
-		logger.info("Successfully updated the dispatch with id: {JobId}", job._id)
+		logger.info("Successfully updated the dispatch with JobId: {JobId}", job._id)
 		await alertTeams([], "completed", [], "Jobs have now been created for the dispatch, everything went well", job._id, context.functionName)
 	}
 
