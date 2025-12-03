@@ -3,7 +3,7 @@ const Jobs = require("../models/jobs.js")
 const Dispatches = require("../models/dispatches.js")
 
 const { logger } = require("@vestfoldfylke/loglady")
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 const getDb = require("../connections/masseutsendelseDB.js")
 const { alertTeams } = require("../helpers/alertTeams.js")
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require("../helpers/archive.js")
@@ -47,7 +47,7 @@ const handleJobs = async (context, runStatus) => {
 		const taskArr = []
 		const failedJobsArr = []
 		let stopHandling = false
-		
+
 		jobId = jobs._id.toString()
 		const jobIdObj = new mongoose.Types.ObjectId(jobId)
 		logger.info("Found a job with id: {JobId}", jobId)

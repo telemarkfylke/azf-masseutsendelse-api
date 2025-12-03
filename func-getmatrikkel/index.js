@@ -6,7 +6,7 @@ const { app } = require("@azure/functions")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 const { MATRIKKEL } = require("../config")
 const getAccessToken = require("../sharedcode/helpers/get-entraid-token")
-const { response } = require("../sharedcode/response/response-handler");
+const { response } = require("../sharedcode/response/response-handler")
 
 const getMatrikkel = async (req) => {
 	// Authentication / Authorization
