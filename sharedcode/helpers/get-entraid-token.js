@@ -9,7 +9,6 @@ module.exports = async (scope, options = { forceNew: false }) => {
 	const cacheKey = scope
 
 	if (!options.forceNew && cache.get(cacheKey)) {
-		logger.info("Found valid token in cache, will use that instead of fetching new")
 		return cache.get(cacheKey)
 	}
 
