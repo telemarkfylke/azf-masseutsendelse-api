@@ -1,5 +1,6 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
+const { ARCHIVE } = require("../config")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
@@ -24,6 +25,12 @@ const getDispatchById = async (req) => {
 		if (!dispatch) {
 			logger.error("Dispatch with Id {Id} could not be found", id)
 			return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse()
+		}
+
+		if (!dispatch.archiveUrl.includes("https://")) {
+			const archiveShowDispatchUrl = ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL.endsWith("/") ? ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL.slice(0, -1) : `${ARCHIVE.ARCHIVE_SHOW_DISPATCH_URL}`
+			const archiveUrl = dispatch.archiveUrl.startsWith("/") ? dispatch.archiveUrl.slice(1) : dispatch.archiveUrl
+			dispatch.archiveUrl = `${archiveShowDispatchUrl}/${archiveUrl}`
 		}
 
 		logger.info("Found dispatch with Id {Id}", id)
