@@ -6,13 +6,7 @@ const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const generatePDF = async (req) => {
 	// Get data from request and validate
-	const { preview, template, documentDefinitionId, data } = await req.json()
-	// TODO: Remove when tested
-	/*const preview = context.bindingData.preview
-	const template = context.bindingData.template
-	const documentDefinitionId = context.bindingData.documentDefinitionId
-	const data = context.bindingData.data*/
-
+	const { preview, template, templateName, documentDefinitionId, data } = await req.json()
 	if (!preview) {
 		return new HTTPError(400, "Preview must provided").toHTTPResponse()
 	}
@@ -48,12 +42,12 @@ const generatePDF = async (req) => {
 
 	if (!responseRequest.ok) {
 		const errorData = await responseRequest.text()
-		logger.error("Failed to create a PDF. Status: {Status}: {StatusText}: {@ErrorData}", responseRequest.status, responseRequest.statusText, errorData)
+		logger.error("Failed to create a PDF using Template {TemplateName}. Status: {Status}: {StatusText}: {@ErrorData}", templateName, responseRequest.status, responseRequest.statusText, errorData)
 		return new HTTPError(responseRequest.status, `Error from PDF Generator: ${responseRequest.statusText}`).toHTTPResponse()
 	}
 
 	const responseData = await responseRequest.json()
-	logger.info("Generated a PDF from Template {Template}", template)
+	logger.info("Generated a PDF from Template '{TemplateName}'", templateName)
 
 	return response(responseData)
 }
