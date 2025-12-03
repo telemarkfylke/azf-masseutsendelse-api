@@ -16,7 +16,9 @@ const getDispatches = async (req) => {
 		const fullQuery = req.query.get("full")
 
 		// Find all dispatches
-		const dispatches = [true, "true"].includes(fullQuery) ? await Dispatches.find({}) : await Dispatches.find({}).select("-owners -excludedOwners -matrikkelUnitsWithoutOwners")
+		const dispatches = [true, "true"].includes(fullQuery)
+			? await Dispatches.find({}).sort({ createdTimestamp: -1 })
+			: await Dispatches.find({}).sort({ createdTimestamp: -1 }).select("-owners -excludedOwners -matrikkelUnitsWithoutOwners")
 
 		// If no dispatches was found
 		if (!dispatches) {
