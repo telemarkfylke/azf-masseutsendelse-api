@@ -104,6 +104,7 @@ describe("Endpoint testing", () => {
 
 	const apikeyHeader = {
 		headers: {
+			get: (_) => undefined,
 			"x-api-key": process.env.APIKEYS_TEST
 		}
 	}
@@ -167,6 +168,7 @@ describe("Endpoint testing", () => {
 		test("Should edit a given template", async () => {
 			const request = {
 				headers: {
+					get: (_) => undefined,
 					"x-api-key": process.env.APIKEYS_TEST
 				},
 				params: {
@@ -601,6 +603,7 @@ describe("Endpoint testing", () => {
 		test("Should not edit a dispatch object since the id provided dose not exist", async () => {
 			const request = {
 				headers: {
+					get: (_) => undefined,
 					"x-api-key": process.env.APIKEYS_TEST
 				},
 				params: {

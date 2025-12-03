@@ -1,5 +1,6 @@
 module.exports = {
 	headers: {
+		get: (_) => undefined,
 		"x-api-key": process.env.APIKEYS_TEST
 	},
 	json: async () => {
