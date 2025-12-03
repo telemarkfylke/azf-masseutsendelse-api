@@ -6,6 +6,6 @@ const getHandleJobs = async (_req, context) => {
 }
 
 app.timer("getHandleJobsTimer", {
-	schedule: "0 */10 1 * * *", // Every 10 minutes between 01:00 - 01:59
+	schedule: "0 */10 * * * *", // Every 10 minutes
 	handler: getHandleJobs
 })
