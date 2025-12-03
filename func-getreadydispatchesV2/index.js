@@ -14,7 +14,7 @@ const getReadyDispatches = async (req, context) => {
 	}
 }
 
-app.timer("getReadyDispatches", {
+app.timer("getReadyDispatchesTimer", {
 	schedule: "0 0 12 * * *", // Every day at 12:00 PM
 	handler: getReadyDispatches
 })

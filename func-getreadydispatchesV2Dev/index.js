@@ -14,9 +14,9 @@ const getReadyDispatches = async (req, context) => {
 	}
 }
 
-app.http("getReadyDispatchesV2", {
+app.http("getReadyDispatches", {
 	authLevel: "anonymous",
 	handler: getReadyDispatches,
 	methods: ["GET"],
-	route: "readyDispatchesV2"
+	route: "readyDispatches"
 })
