@@ -40,6 +40,12 @@ module.exports = async (scope, options = { forceNew: false }) => {
 			clientId: clientID,
 			authority: `https://login.microsoftonline.com/${MS.TENANT_ID}/`,
 			clientSecret
+		},
+		cache: {
+			claimsBasedCachingEnabled: true
+		},
+		system: {
+			allowPlatformBroker: true
 		}
 	}
 
