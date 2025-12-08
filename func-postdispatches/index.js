@@ -1,7 +1,6 @@
 const { app } = require("@azure/functions")
 const { logger } = require("@vestfoldfylke/loglady")
 const blobClient = require("@vtfk/azure-blob-client")
-const utils = require("@vtfk/utilities")
 const { ObjectId } = require("mongodb")
 const allowedExtensions = require("../sharedcode/allowedExtensions.json")
 const { auth } = require("../sharedcode/auth/auth")
@@ -14,9 +13,7 @@ const { STORAGE } = require("../config")
 
 const postDispatches = async (req) => {
 	try {
-		// Strip away som fields that should not bed set by the request.
-		const rawRequestBody = await req.json()
-		const requestBody = utils.removeKeys(rawRequestBody, ["validatedArchivenumber", "createdTimestamp", "createdBy", "createdById", "modifiedTimestamp", "modifiedBy", "modifiedById"])
+		const requestBody = await req.json()
 		delete requestBody._id // _id must be removed by itself to not remove template _id and other _ids as well
 
 		// Authentication / Authorization

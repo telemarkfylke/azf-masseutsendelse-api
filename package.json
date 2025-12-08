@@ -20,7 +20,6 @@
 		"@shelf/jest-mongodb": "^6.0.2",
 		"@vestfoldfylke/loglady": "^1.5.0",
 		"@vtfk/azure-blob-client": "^0.1.7",
-		"@vtfk/utilities": "^1.4.1",
 		"azure-ad-verify-token": "^1.1.2",
 		"dayjs": "^1.11.19",
 		"mongoose": "^9.0.1",

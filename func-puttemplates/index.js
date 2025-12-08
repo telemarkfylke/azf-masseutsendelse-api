@@ -1,6 +1,5 @@
 const { app } = require("@azure/functions")
 const { logger } = require("@vestfoldfylke/loglady")
-const utils = require("@vtfk/utilities")
 const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Templates = require("../sharedcode/models/templates.js")
@@ -12,9 +11,7 @@ const putTemplates = async (req) => {
 		// Authentication / Authorization
 		const requestor = await auth(req)
 
-		// Strip away som fields that should not bed set by the request.
-		const rawRequestBody = await req.json()
-		const requestBody = utils.removeKeys(rawRequestBody, ["createdTimestamp", "createdBy", "createdById", "modifiedTimestamp", "modifiedBy", "modifiedById"])
+		const requestBody = await req.json()
 
 		// Update modified by
 		requestBody.modifiedBy = requestor.name

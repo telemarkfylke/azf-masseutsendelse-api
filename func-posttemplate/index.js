@@ -1,6 +1,5 @@
 const { app } = require("@azure/functions")
 const { logger } = require("@vestfoldfylke/loglady")
-const utils = require("@vtfk/utilities")
 const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Templates = require("../sharedcode/models/templates.js")
@@ -11,18 +10,7 @@ const postTemplate = async (req) => {
 		// Authentication / Authorization
 		const requestor = await auth(req)
 
-		// Strip away some fields that should not be able to be set by the request
-		const rawRequestBody = await req.json()
-		const requestBody = utils.removeKeys(rawRequestBody, [
-			"createdTimestamp",
-			"createdBy",
-			"createdById",
-			"createdByDepartment",
-			"modifiedTimestamp",
-			"modifiedBy",
-			"modifiedById",
-			"modifiedByDepartment"
-		])
+		const requestBody = await req.json()
 
 		// Await database connection
 		await getDb()

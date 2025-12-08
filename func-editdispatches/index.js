@@ -1,7 +1,6 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
 const blobClient = require("@vtfk/azure-blob-client")
-const utils = require("@vtfk/utilities")
 const allowedExtensions = require("../sharedcode/allowedExtensions.json")
 const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
@@ -12,19 +11,7 @@ const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const editDispatches = async (req) => {
 	try {
-		// Strip away som fields that should not be set by the request.
-		const rawRequestBody = await req.json()
-		const requestBody = utils.removeKeys(rawRequestBody, [
-			"validatedArchivenumber",
-			"createdTimestamp",
-			"createdBy",
-			"createdById",
-			"createdByDepartment",
-			"modifiedTimestamp",
-			"modifiedBy",
-			"modifiedById",
-			"modifiedByDepartment"
-		])
+		const requestBody = await req.json()
 		delete requestBody._id
 
 		// Authentication / Authorization
