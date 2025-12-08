@@ -1,11 +1,12 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
+const { auth } = require("../sharedcode/auth/auth")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const getBRReg = async (req) => {
 	// Authentication / Authorization
-	await require("../sharedcode/auth/auth").auth(req)
+	await auth(req)
 
 	// Get ID from request
 	const id = req.params.id

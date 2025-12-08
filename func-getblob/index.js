@@ -1,13 +1,14 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
 const blobClient = require("@vtfk/azure-blob-client")
+const { auth } = require("../sharedcode/auth/auth")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
 const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const getBlob = async (req) => {
 	try {
 		// Authentication / Authorization
-		await require("../sharedcode/auth/auth").auth(req)
+		await auth(req)
 
 		// Input validation
 		if (!req.params.id) {

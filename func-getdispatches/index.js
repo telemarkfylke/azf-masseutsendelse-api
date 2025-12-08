@@ -1,6 +1,7 @@
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
 const { ARCHIVE } = require("../config")
+const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
@@ -8,7 +9,7 @@ const { errorResponse, response } = require("../sharedcode/response/response-han
 const getDispatches = async (req) => {
 	try {
 		// Authentication / Authorization
-		await require("../sharedcode/auth/auth").auth(req)
+		await auth(req)
 
 		// Await the DB connection
 		await getDb()

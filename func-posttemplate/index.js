@@ -1,6 +1,7 @@
 const { app } = require("@azure/functions")
 const { logger } = require("@vestfoldfylke/loglady")
 const utils = require("@vtfk/utilities")
+const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Templates = require("../sharedcode/models/templates.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
@@ -8,7 +9,7 @@ const { errorResponse, response } = require("../sharedcode/response/response-han
 const postTemplate = async (req) => {
 	try {
 		// Authentication / Authorization
-		const requestor = await require("../sharedcode/auth/auth").auth(req)
+		const requestor = await auth(req)
 
 		// Strip away some fields that should not be able to be set by the request
 		const rawRequestBody = await req.json()

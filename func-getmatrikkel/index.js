@@ -3,14 +3,15 @@
 */
 const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
-const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 const { MATRIKKEL } = require("../config")
+const { auth } = require("../sharedcode/auth/auth")
 const getAccessToken = require("../sharedcode/helpers/get-entraid-token")
 const { response } = require("../sharedcode/response/response-handler")
+const HTTPError = require("../sharedcode/vtfk-errors/httperror")
 
 const getMatrikkel = async (req) => {
 	// Authentication / Authorization
-	await require("../sharedcode/auth/auth").auth(req)
+	await auth(req)
 
 	// Input validation
 	if (!MATRIKKEL.MATRIKKEL_BASEURL) {

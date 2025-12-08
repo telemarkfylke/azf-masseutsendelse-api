@@ -2,6 +2,7 @@ const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
 const blobClient = require("@vtfk/azure-blob-client")
 const utils = require("@vtfk/utilities")
+const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
 const { errorResponse, response } = require("../sharedcode/response/response-handler")
@@ -26,7 +27,7 @@ const editDispatches = async (req) => {
 		delete requestBody._id
 
 		// Authentication / Authorization
-		const requestor = await require("../sharedcode/auth/auth").auth(req)
+		const requestor = await auth(req)
 
 		// Update modified by
 		requestBody.modifiedBy = requestor.name
