@@ -1,6 +1,3 @@
-/*
-  Import dependencies
-*/
 const azuread = require("./lib/azuread")
 /*
   Auth function
@@ -13,6 +10,11 @@ const azuread = require("./lib/azuread")
 async function auth(req) {
 	const authValue = req.headers.get("authorization") || req.headers.get("Authorization")
 	if (!authValue) {
+		if (process.env.NODE_ENV?.toLowerCase() !== "test") {
+			throw new Error("No authorization header was provided")
+		}
+
+		// Return a default timetrigger user in test mode since no auth header is provided
 		return {
 			name: "timetrigger",
 			id: "timetrigger",
