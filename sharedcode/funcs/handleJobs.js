@@ -95,8 +95,8 @@ const handleJobs = async (context, runStatus) => {
 			// Find the job
 			if (status === "waiting" || status === "inprogress") {
 				if (((job === "createCaseDocument" || job === "issueDispatch" || job === "uploadAttachments") && stopHandling === true) || (job === "issueDispatch" && stopHandling === true)) {
-					logger.error("The job: {Job} with mongoDB id: {JobId} cannot be handled because a StopHandling is true ({StopHandling})", job, jobId, stopHandling)
-					await alertTeams(`Current job: ${job} and stopHandling is: ${stopHandling}. DispatchID: ${jobId}. You need to look into it!`)
+					logger.error("The job: {Job} with mongoDB id: {JobId} cannot be handled because StopHandling is true ({StopHandling})", job, jobId, stopHandling)
+					await alertTeams(`Current job: ${job} and stopHandling is: ${stopHandling}. DispatchID: ${jobId}. You need to look into it!`, "error", `${job} cannot be handled because StopHandling is true`, [], jobId, context.functionName)
 				} else {
 					const jobsObj = { [job]: jobs.tasks[job] }
 					logger.info("Pushing task to the task array for Job: {@Job}", job)
