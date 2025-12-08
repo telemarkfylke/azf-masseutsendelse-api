@@ -5,10 +5,9 @@ const { errorResponse } = require("../sharedcode/response/response-handler")
 
 const getHandleJobs = async (req, context) => {
 	try {
-		logger.info("Checking AUTH")
 		await require("../sharedcode/auth/auth.js").auth(req)
 	} catch (error) {
-		logger.errorException(error, "Auth failed. Aborting handleJobs", 401)
+		logger.errorException(error, "Auth failed. Aborting handleJobs")
 		return errorResponse(error, "Unauthorized", 401)
 	}
 
