@@ -2,6 +2,7 @@ const { logger } = require("@vestfoldfylke/loglady")
 const { app } = require("@azure/functions")
 const blobClient = require("@vtfk/azure-blob-client")
 const utils = require("@vtfk/utilities")
+const allowedExtensions = require("../sharedcode/allowedExtensions.json")
 const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
@@ -88,7 +89,6 @@ const editDispatches = async (req) => {
 		requestBody.validatedArchivenumber = requestBody.archivenumber
 
 		// Validate attachments
-		const allowedExtensions = ["pdf", "xlsx", "xls", "rtf", "msg", "ppt", "pptx", "docx", "doc", "png", "jpg", "jpeg"]
 		if (requestBody.attachments && Array.isArray(requestBody.attachments) && requestBody.attachments.length > 0) {
 			requestBody.attachments.forEach((i) => {
 				const split = i.name.split(".")

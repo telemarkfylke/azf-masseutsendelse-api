@@ -3,6 +3,7 @@ const { logger } = require("@vestfoldfylke/loglady")
 const blobClient = require("@vtfk/azure-blob-client")
 const utils = require("@vtfk/utilities")
 const { ObjectId } = require("mongodb")
+const allowedExtensions = require("../sharedcode/allowedExtensions.json")
 const { auth } = require("../sharedcode/auth/auth")
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js")
 const Dispatches = require("../sharedcode/models/dispatches.js")
@@ -77,7 +78,6 @@ const postDispatches = async (req) => {
 
 		// Save the new dispatch to the database
 		const results = await dispatch.save()
-		const allowedExtensions = ["pdf", "xlsx", "xls", "rtf", "msg", "ppt", "pptx", "docx", "doc", "png", "jpg", "jpeg"]
 
 		// Upload files attached to the dispatch object if files exist.
 		if (requestBody.attachments || Array.isArray(requestBody.attachments)) {
