@@ -38,10 +38,5 @@
 		"mongodbMemoryServer": {
 			"version": "7.0.24"
 		}
-	},
-	"standard": {
-		"ignore": [
-			"/sharedcode/tests"
-		]
 	}
 }
