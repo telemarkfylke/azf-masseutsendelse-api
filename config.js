@@ -32,7 +32,6 @@ module.exports = {
     STATISTICS_URL: process.env.STATISTICS_URL
   },
   MS: {
-    TENANT_ID: process.env.APP_REG_TENANT_ID,
     AZUREAD_ALLOWEDGROUPS: process.env.AZUREAD_ALLOWEDGROUPS,
     TEAMS_ALERTS_WEBHOOK_URL: process.env.TEAMS_ALERTS_WEBHOOK_URL
   },
