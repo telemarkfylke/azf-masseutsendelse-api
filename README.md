@@ -58,7 +58,7 @@ Will return the dispatch object with the id provided. It will only return one si
 
 ### Example dispatches & dispatches /{id}
 
-```json
+```json5
 [
     {
         "stats": {
@@ -200,7 +200,7 @@ For documentation on E18:
  - https://github.com/vtfk/E18-api
  
 ### Example readyDisptaches
-```json
+```json5
 [
     {
         "_id": "620f639ad96d2f1ef80e6fd6",
@@ -313,7 +313,7 @@ For documentation on the azure-blob-client:
 
 ### Example /blobs/{id}/{name}
 
-```json
+```json5
 {
   "name": "Mail.msg",
   "path": "620fa95b909f461cacf5adf2/Mail.msg", //Path used to locate the requested file, /{id}/{name}
@@ -437,7 +437,7 @@ This endpoint is used to post a new dispatch object to the mongoDB.
 
 ### Example /dispatches
 
-```json
+```json5
 
 {
    "title": "Demo",
@@ -1142,7 +1142,7 @@ This endpoint is used to post a new template to the mongoDB
 
 ### Example /templates
 
-```json
+```json5
 {
     "name": "Demo",
     "description": "Brukes om det skal utføres en demo",
