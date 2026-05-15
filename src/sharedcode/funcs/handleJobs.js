@@ -1,6 +1,7 @@
 // Models
 const Jobs = require("../models/jobs.js");
 const Dispatches = require("../models/dispatches.js");
+const blobClient = require("@vtfk/azure-blob-client");
 
 const { logger } = require("@vestfoldfylke/loglady");
 const mongoose = require("mongoose");
@@ -9,6 +10,42 @@ const { alertTeams } = require("../helpers/alertTeams.js");
 const { syncRecipient, createCaseDocument, addAttachment, dispatchDocuments } = require("../helpers/archive.js");
 const { createStatistics } = require("../helpers/statistics.js");
 const { errorResponse, response } = require("../response/response-handler");
+
+const normalizeBase64Data = (data) => {
+  if (typeof data !== "string") return data;
+  if (data.startsWith("data:") && data.includes(",")) {
+    return data.substring(data.indexOf(",") + 1);
+  }
+
+  return data;
+};
+
+const resolveAttachmentBase64 = async (attachment) => {
+  if (!attachment) {
+    throw new Error("Attachment payload is missing");
+  }
+
+  if (attachment.base64) {
+    return {
+      ...attachment,
+      base64: normalizeBase64Data(attachment.base64)
+    };
+  }
+
+  if (!attachment.blobPath) {
+    throw new Error("Attachment is missing both base64 and blobPath");
+  }
+
+  const file = await blobClient.get(attachment.blobPath);
+  if (!file?.data) {
+    throw new Error(`No blob data found for ${attachment.blobPath}`);
+  }
+
+  return {
+    ...attachment,
+    base64: normalizeBase64Data(file.data)
+  };
+};
 
 const handleJobs = async (context, runStatus) => {
   let jobId;
@@ -269,6 +306,16 @@ const handleJobs = async (context, runStatus) => {
               paragraph: currentTasks.data.parameter.paragraph,
               responsiblePersonEmail: currentTasks.data.parameter.responsiblePersonEmail
             };
+
+            // Attachments may be stored as blob references in job tasks to avoid oversized Mongo documents.
+            if (Array.isArray(caseObj.attachments) && caseObj.attachments.length > 0) {
+              const resolvedAttachments = [];
+              for (const attachment of caseObj.attachments) {
+                resolvedAttachments.push(await resolveAttachmentBase64(attachment));
+              }
+              caseObj.attachments = resolvedAttachments;
+            }
+
             // Make the request
             logger.info("Trying to create the case document");
             const caseDoc = await createCaseDocument(
@@ -365,12 +412,13 @@ const handleJobs = async (context, runStatus) => {
             }
             if (currentTasks[currentTaskIndex].status === "inprogress") {
               logger.info("Adding attachment");
+              const resolvedAttachment = await resolveAttachmentBase64(attachment.data.parameter);
               const addedAttachment = await addAttachment(
                 attachment.data.system,
                 attachment.dataMapping,
-                attachment.data.parameter.base64,
-                attachment.data.parameter.format,
-                attachment.data.parameter.title
+                resolvedAttachment.base64,
+                resolvedAttachment.format,
+                resolvedAttachment.title
               );
               logger.info("Attachment added");
               issueDispatchCopy[0].dataMapping = addedAttachment.DocumentNumber;

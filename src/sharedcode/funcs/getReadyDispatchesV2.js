@@ -1,4 +1,3 @@
-const blobClient = require("@vtfk/azure-blob-client");
 const { logger } = require("@vestfoldfylke/loglady");
 const dayjs = require("dayjs");
 const getDb = require("../connections/masseutsendelseDB.js");
@@ -8,6 +7,22 @@ const Jobs = require("../models/jobs");
 const { response } = require("../response/response-handler");
 const HTTPError = require("../vtfk-errors/httperror");
 const { PDF_GENERATOR, MISC } = require("../../config");
+
+const extractFileMetadata = (filename) => {
+  if (!filename || typeof filename !== "string") {
+    throw new HTTPError(400, "Attachment filename is missing or invalid");
+  }
+
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex <= 0 || dotIndex === filename.length - 1) {
+    throw new HTTPError(400, `Attachment ${filename} is missing a valid file extension`);
+  }
+
+  return {
+    title: filename.substring(0, dotIndex),
+    format: filename.substring(dotIndex + 1)
+  };
+};
 
 const generatePdfFromTemplate = async (dispatch) => {
   const data = dispatch.template.data || {};
@@ -78,28 +93,13 @@ const retrieveAttachments = async (dispatch) => {
   logger.info("{DispatchAttachmentCount} attachment(s) found", dispatch.attachments.length);
   const attachments = [];
   for (const attachment of dispatch.attachments) {
-    logger.info("Fetching the attachment: {AttachmentName} from blob storage", attachment.name);
-    const file = await blobClient.get(`${dispatch._id}/${attachment.name}`);
-
-    // Validate the files
-    if (!file?.data || file.data.length === 0) {
-      logger.error("No files found, check if you passed the right filename and/or the right dispatchId");
-      throw new HTTPError(404, "No files found, check if you passed the right filename and/or the right dispatchId");
-    }
-
-    logger.info("Successfully fetched the attachment: {AttachmentName} from blob storage, validating the file.", attachment.name);
-    if (file.data.startsWith("data:") && file.data.includes(",")) {
-      file.data = file.data.substring(file.data.indexOf(",") + 1);
-    }
-    if (file.name.includes(".")) {
-      file.name = file.name.substring(0, file.name.indexOf("."));
-    }
-    logger.info("Attachment: {AttachmentName} is valid, pushing it to the file array.", attachment.name);
+    logger.info("Preparing attachment reference: {AttachmentName}", attachment.name);
+    const fileMetadata = extractFileMetadata(attachment.name);
 
     attachments.push({
-      title: file.name,
-      format: file.extension,
-      base64: file.data
+      title: fileMetadata.title,
+      format: fileMetadata.format,
+      blobPath: `${dispatch._id}/${attachment.name}`
     });
   }
 
@@ -262,7 +262,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
               secure: false,
               title: file.title,
               format: file.format,
-              base64: file.base64,
+              blobPath: file.blobPath,
               versionFormat: "P"
             }
           }
