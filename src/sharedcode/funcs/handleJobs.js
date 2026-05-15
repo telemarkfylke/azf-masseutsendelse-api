@@ -413,13 +413,7 @@ const handleJobs = async (context, runStatus) => {
             if (currentTasks[currentTaskIndex].status === "inprogress") {
               logger.info("Adding attachment");
               const resolvedAttachment = await resolveAttachmentBase64(attachment.data.parameter);
-              const addedAttachment = await addAttachment(
-                attachment.data.system,
-                attachment.dataMapping,
-                resolvedAttachment.base64,
-                resolvedAttachment.format,
-                resolvedAttachment.title
-              );
+              const addedAttachment = await addAttachment(attachment.data.system, attachment.dataMapping, resolvedAttachment.base64, resolvedAttachment.format, resolvedAttachment.title);
               logger.info("Attachment added");
               issueDispatchCopy[0].dataMapping = addedAttachment.DocumentNumber;
               currentTasks[currentTaskIndex].response = addedAttachment;
