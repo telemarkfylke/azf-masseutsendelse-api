@@ -23,10 +23,12 @@ const postDispatches = async (req) => {
     requestBody._id = new ObjectId();
     requestBody.status = "notapproved";
 
+    requestBody.createdTimestamp = new Date();
     requestBody.createdBy = requestor.name;
     requestBody.createdById = requestor.id;
     requestBody.createdByEmail = requestor.email;
     requestBody.createdByDepartment = requestor.department;
+    requestBody.modifiedTimestamp = new Date();
     requestBody.modifiedById = requestor.id;
     requestBody.modifiedBy = requestor.name;
     requestBody.modifiedByEmail = requestor.email;

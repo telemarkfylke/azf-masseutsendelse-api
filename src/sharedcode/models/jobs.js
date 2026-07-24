@@ -29,7 +29,6 @@ const jobsSchema = new mongoose.Schema({
   },
   jobCreatedTimeStamp: {
     type: Date,
-    default: new Date(),
     required: true
   },
   status: {

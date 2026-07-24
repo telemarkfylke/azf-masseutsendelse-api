@@ -17,9 +17,11 @@ const postTemplate = async (req) => {
 
     // Set some default values
     requestBody.version = 1;
+    requestBody.createdTimestamp = new Date();
     requestBody.createdBy = requestor.name;
     requestBody.createdById = requestor.id;
     requestBody.createdByDepartment = requestor.department;
+    requestBody.modifiedTimestamp = new Date();
     requestBody.modifiedBy = requestor.name;
     requestBody.modifiedById = requestor.id;
     requestBody.modifiedByDepartment = requestor.department;

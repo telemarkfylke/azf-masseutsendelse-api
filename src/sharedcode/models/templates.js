@@ -39,7 +39,6 @@ const templateSchema = new mongoose.Schema({
   },
   createdTimestamp: {
     type: Date,
-    default: new Date(),
     required: true
   },
   createdBy: {
@@ -57,7 +56,6 @@ const templateSchema = new mongoose.Schema({
   },
   modifiedTimestamp: {
     type: Date,
-    default: new Date(),
     required: true
   },
   modifiedBy: {

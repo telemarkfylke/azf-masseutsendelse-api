@@ -194,7 +194,6 @@ const dispatchesSchema = new mongoose.Schema({
   },
   createdTimestamp: {
     type: Date,
-    default: new Date(),
     required: true
   },
   createdBy: {
@@ -216,7 +215,6 @@ const dispatchesSchema = new mongoose.Schema({
   },
   modifiedTimestamp: {
     type: Date,
-    default: new Date(),
     required: true
   },
   modifiedBy: {

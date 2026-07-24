@@ -158,6 +158,7 @@ const getReadyDispatchesV2 = async (_req, context) => {
     const dispatchJob = {
       title: dispatch.title,
       approvedTimeStamp: dispatch.approvedTimestamp,
+      jobCreatedTimeStamp: new Date(),
       delayUntil: delaySendUntil.toISOString(),
       status: {
         syncRecipients: "waiting",
