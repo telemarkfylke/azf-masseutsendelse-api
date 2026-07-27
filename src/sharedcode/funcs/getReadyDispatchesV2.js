@@ -139,11 +139,9 @@ const getReadyDispatchesV2 = async (_req, context) => {
     logger.info("Found an approved dispatch to handle, checking if it has passed the registration threshold");
 
     // Check if the dispatch has passed the registration threshold
-    const registrationThreshold = dayjs(dispatch.approvedTimestamp).set("hour", 23).set("minute", 59).set("second", 59).set("millisecond", 0);
-    const delaySendUntil = dayjs().set("hour", 11).set("minute", 0).set("second", 0).set("millisecond", 0);
-
     // If true, registration threshold check will be skipped and jobs will be created.
     if (!MISC.BYPASS_REGISTRATION_THRESHOLD) {
+      const registrationThreshold = dayjs(dispatch.approvedTimestamp).set("hour", 23).set("minute", 59).set("second", 59).set("millisecond", 0);
       logger.info("Checking registration threshold, will create job if it is passed.");
       if (dayjs(new Date()).isBefore(registrationThreshold)) {
         logger.info("Registration threshold not passed. Job will not be created at this time");
@@ -154,6 +152,8 @@ const getReadyDispatchesV2 = async (_req, context) => {
     }
 
     // Variables
+    const delaySendUntil = dayjs().set("hour", 11).set("minute", 0).set("second", 0).set("millisecond", 0);
+
     const dispatchFiles = []; // Stores all files that should be registered to the job
     const dispatchJob = {
       title: dispatch.title,

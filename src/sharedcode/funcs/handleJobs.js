@@ -122,7 +122,7 @@ const handleJobs = async (context, runStatus) => {
           });
           logger.info("The failedJobs array for JobId {JobId} have been updated", jobId);
           logger.error("The job: {Job} with mongoDB id: {JobId} have failed 7 times and the whole job is stopped!", job, jobId);
-          await alertTeams("Job failed 7 times, please look at it!", "error", failedJobsArr, [], context.functionName);
+          await alertTeams("Job failed 7 times, please look at it!", "error", failedJobsArr, [], jobId, context.functionName);
         } catch (error) {
           await alertTeams(JSON.stringify(error), "error", "pushing failed job to mongodb", [], jobId, context.functionName);
           logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId);
