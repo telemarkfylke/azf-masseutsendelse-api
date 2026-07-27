@@ -249,6 +249,12 @@ const dispatchesSchema = new mongoose.Schema({
   },
   approvedByDepartment: {
     type: String
+  },
+  inProgressTimestamp: {
+    type: Date
+  },
+  completedTimestamp: {
+    type: Date
   }
 });
 

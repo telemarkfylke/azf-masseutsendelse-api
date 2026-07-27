@@ -295,7 +295,8 @@ const getReadyDispatchesV2 = async (_req, context) => {
     // Set dispatch to inprogress
     const filter = { _id: job._id };
     const update = {
-      status: "inprogress"
+      status: "inprogress",
+      inProgressTimestamp: Date.now()
     };
     logger.info("Updating the dispatch with JobId: {JobId} as InProgress", job._id);
     updatedDispatch = await Dispatches.findOneAndUpdate(filter, update, {

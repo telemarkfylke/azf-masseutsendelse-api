@@ -577,7 +577,8 @@ const handleJobs = async (context, runStatus) => {
               status: "completed",
               owners: [],
               excludedOwners: [],
-              matrikkelUnitsWithoutOwners: []
+              matrikkelUnitsWithoutOwners: [],
+              completedTimestamp: new Date()
             };
             logger.info("Updating the dispatch as completed and wiping the dispatch for personal information with JobId: {JobId}", jobId);
             await Dispatches.findOneAndUpdate(dispatchFilter, dispatchUpdate, {
