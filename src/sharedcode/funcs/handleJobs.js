@@ -552,8 +552,8 @@ const handleJobs = async (context, runStatus) => {
           const statRes = await createStatistics(DispatchDoc.createdByDepartment, jobId, privatepersons, enterprises);
           if (statRes.acknowledged) {
             logger.info("Statistics successfully pushed to the DB");
-            const filter = { _id: jobId };
-            const update = {
+            const jobFilter = { _id: jobId };
+            const jobUpdate = {
               "status.createStatistics": "completed",
               "tasks.createStatistics": [
                 {
@@ -565,12 +565,25 @@ const handleJobs = async (context, runStatus) => {
               ]
             };
             logger.info("Updating the job with JobId: {JobId} as completed", jobId);
-            await Jobs.findOneAndUpdate(filter, update, {
+            await Jobs.findOneAndUpdate(jobFilter, jobUpdate, {
               new: true
             });
             logger.info("The job with JobId {JobId} is updated and all tasks is completed! Removing the job from the jobs collection", jobId);
             await Jobs.findOneAndDelete({ _id: jobId });
             logger.info("The job with JobId {JobId} has successfully been deleted", jobId);
+
+            const dispatchFilter = { _id: jobId };
+            const dispatchUpdate = {
+              status: "completed",
+              owners: [],
+              excludedOwners: [],
+              matrikkelUnitsWithoutOwners: []
+            };
+            logger.info("Updating the dispatch as completed and wiping the dispatch for personal information with JobId: {JobId}", jobId);
+            await Dispatches.findOneAndUpdate(dispatchFilter, dispatchUpdate, {
+              new: true
+            });
+            logger.info("Successfully updated the dispatch as completed with JobId: {JobId}", jobId);
             await alertTeams([], "completed", [], "Job has been completed and removed from the jobs collection", jobId, context.functionName);
           } else {
             logger.error("Failed pushing statistics to the DB");

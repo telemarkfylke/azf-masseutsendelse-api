@@ -292,21 +292,18 @@ const getReadyDispatchesV2 = async (_req, context) => {
     // Save the new dispatch to the database
     await job.save();
     logger.info("Successfully saved the job to the Jobs collection with the JobId: {JobId}", job._id);
-    // Set dispatch to completed and wipe data that is not needed.
+    // Set dispatch to inprogress
     const filter = { _id: job._id };
     const update = {
-      status: "completed",
-      owners: [],
-      excludedOwners: [],
-      matrikkelUnitsWithoutOwners: []
+      status: "inprogress"
     };
-    logger.info("Updating and wiping the dispatch with JobId: {JobId} for personal information", job._id);
+    logger.info("Updating the dispatch with JobId: {JobId} as InProgress", job._id);
     updatedDispatch = await Dispatches.findOneAndUpdate(filter, update, {
       new: true
     });
 
     logger.info("Successfully updated the dispatch with JobId: {JobId}", job._id);
-    await alertTeams([], "completed", [], "Jobs have now been created for the dispatch, everything went well", job._id, context.functionName);
+    await alertTeams([], "completed", [], "Jobs have now been created for the dispatch, everything went well", job._id, context.functionName, "InProgress");
   }
 
   return response(updatedDispatch);

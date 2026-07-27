@@ -1,7 +1,7 @@
 const { logger } = require("@vestfoldfylke/loglady");
 const { MS } = require("../../config");
 
-const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoint) => {
+const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoint, nonErrorStatusText = "Completed") => {
   if (!color) {
     throw new Error("Color must be provided");
   }
@@ -53,7 +53,7 @@ const alertTeams = async (error, color, failedTask, completedJob, jobId, endpoin
             },
             {
               type: "TextBlock",
-              text: `Task ${color === "a80c0c" ? "Failed" : "Completed"}`,
+              text: `Task ${color === "a80c0c" ? "Failed" : nonErrorStatusText}`,
               wrap: true,
               weight: "Bolder",
               size: "Medium"
