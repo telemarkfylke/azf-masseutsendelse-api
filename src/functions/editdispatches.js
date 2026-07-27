@@ -46,7 +46,7 @@ const editDispatches = async (req) => {
       return new HTTPError(400, "No changes can be done to a running dispatch except setting it to completed").toHTTPResponse();
     }
     if (existingDispatch.status === "inprogress" && requestBody.status === "completed") {
-      const result = await Dispatches.findByIdAndUpdate(id, { status: "completed" }, { new: true });
+      const result = await Dispatches.findByIdAndUpdate(id, { status: "completed" }, { returnDocument: "after" });
       return response(result, 201);
     }
     // Failsafe
@@ -95,7 +95,7 @@ const editDispatches = async (req) => {
     }
 
     // Update the dispatch
-    const updatedDispatch = await Dispatches.findByIdAndUpdate(id, { ...requestBody, $unset: unsets }, { new: true });
+    const updatedDispatch = await Dispatches.findByIdAndUpdate(id, { ...requestBody, $unset: unsets }, { returnDocument: "after" });
 
     // Figure out the names of existing and requested attachments
     const existingNames = existingDispatch.attachments ? existingDispatch.attachments.map((i) => i.name) : [];

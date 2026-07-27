@@ -40,7 +40,7 @@ const putTemplates = async (req) => {
     requestBody.version = existingTemplate.version + 1;
 
     // Update the template
-    const updatedTemplate = await Templates.findByIdAndUpdate(id, requestBody, { new: true });
+    const updatedTemplate = await Templates.findByIdAndUpdate(id, requestBody, { returnDocument: "after" });
 
     logger.info("Returning updated template with Id {Id}", id);
     return response(updatedTemplate);

@@ -475,14 +475,14 @@ it("Should return a template with the given id from the database", async () => {
 it("Should edit one dispatch with the given ID from the database", async () => {
   const existingDispatch = await Dispatches.findById(dispatchId).lean();
   const newDate = new Date();
-  const updatedDispatch = await Dispatches.findByIdAndUpdate(dispatchId, { modifiedTimestamp: `${newDate}` }, { new: true });
+  const updatedDispatch = await Dispatches.findByIdAndUpdate(dispatchId, { modifiedTimestamp: `${newDate}` }, { returnDocument: "after" });
   assert.notStrictEqual(updatedDispatch.modifiedTimestamp, existingDispatch.modifiedTimestamp);
 });
 
 it("Should edit one template with the given ID from the database", async () => {
   const existingTemplate = await Templates.findById(templateId).lean();
   const newDate = new Date();
-  const updatedTemplate = await Templates.findByIdAndUpdate(templateId, { modifiedTimestamp: `${newDate}` }, { new: true });
+  const updatedTemplate = await Templates.findByIdAndUpdate(templateId, { modifiedTimestamp: `${newDate}` }, { returnDocument: "after" });
   assert.notStrictEqual(updatedTemplate.modifiedTimestamp, existingTemplate.modifiedTimestamp);
 });
 

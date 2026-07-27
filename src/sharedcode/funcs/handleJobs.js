@@ -117,7 +117,7 @@ const handleJobs = async (context, runStatus) => {
             }
           };
           await Jobs.findOneAndUpdate(filter, update, {
-            new: true,
+            returnDocument: "after",
             upsert: true
           });
           logger.info("The failedJobs array for JobId {JobId} have been updated", jobId);
@@ -185,7 +185,7 @@ const handleJobs = async (context, runStatus) => {
                   "status.syncRecipients": "failed"
                 };
                 await Jobs.findOneAndUpdate(filter, update, {
-                  new: true
+                  returnDocument: "after"
                 });
               }
               try {
@@ -247,7 +247,7 @@ const handleJobs = async (context, runStatus) => {
           };
           logger.info("Updating the job with the id: {JobId}", jobId);
           await Jobs.findOneAndUpdate(filter, update, {
-            new: true
+            returnDocument: "after"
           });
         } catch (error) {
           logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId);
@@ -287,7 +287,7 @@ const handleJobs = async (context, runStatus) => {
               "status.createCaseDocument": "failed"
             };
             await Jobs.findOneAndUpdate(filter, update, {
-              new: true
+              returnDocument: "after"
             });
           } else {
             // There's only one case document for each task. Index[0] Is fine.
@@ -350,7 +350,7 @@ const handleJobs = async (context, runStatus) => {
             };
             logger.info("Updating job with id: {JobId}", jobId);
             await Jobs.findOneAndUpdate(filter, update, {
-              new: true
+              returnDocument: "after"
             });
             logger.info("Job with id: {JobId} updated", jobId);
           }
@@ -387,7 +387,7 @@ const handleJobs = async (context, runStatus) => {
                   "status.uploadAttachments": "failed"
                 };
                 await Jobs.findOneAndUpdate(filter, update, {
-                  new: true
+                  returnDocument: "after"
                 });
               } catch (error) {
                 logger.errorException(error, "Failed to update the status of: {JobToHandle} with the job id: {JobId}", jobToHandle, jobId);
@@ -442,7 +442,7 @@ const handleJobs = async (context, runStatus) => {
           };
           logger.info("Finding the job and updating the job with JobId {JobId}", jobId);
           await Jobs.findOneAndUpdate(filter, update, {
-            new: true
+            returnDocument: "after"
           });
           logger.info("The job with JobId {JobId} have been updated", jobId);
         } catch (error) {
@@ -460,7 +460,7 @@ const handleJobs = async (context, runStatus) => {
               "status.uploadAttachments": "failed"
             };
             await Jobs.findOneAndUpdate(filter, update, {
-              new: true
+              returnDocument: "after"
             });
           }
           if (currentTasks[currentTaskIndex].status === "failed") {
@@ -469,7 +469,7 @@ const handleJobs = async (context, runStatus) => {
               "tasks.uploadAttachments": currentTasks
             };
             await Jobs.findOneAndUpdate(filter, update, {
-              new: true
+              returnDocument: "after"
             });
           }
           logger.errorException(error, "Failed pushing the job: {Job} with mongoDB id: {JobId} to mongoDB!", job, jobId);
@@ -506,7 +506,7 @@ const handleJobs = async (context, runStatus) => {
               };
               logger.info("Updating the job with JobId: {JobId}", jobId);
               await Jobs.findOneAndUpdate(filter, update, {
-                new: true
+                returnDocument: "after"
               });
               logger.info("Job with JobId {JobId} updated", jobId);
             } catch (error) {
@@ -528,7 +528,7 @@ const handleJobs = async (context, runStatus) => {
               };
               logger.info("Updating the job with JobId: {JobId}", jobId);
               await Jobs.findOneAndUpdate(filter, update, {
-                new: true
+                returnDocument: "after"
               });
               logger.info("Job with JobId {JobId} updated", jobId);
             } catch (error) {
@@ -566,7 +566,7 @@ const handleJobs = async (context, runStatus) => {
             };
             logger.info("Updating the job with JobId: {JobId} as completed", jobId);
             await Jobs.findOneAndUpdate(jobFilter, jobUpdate, {
-              new: true
+              returnDocument: "after"
             });
             logger.info("The job with JobId {JobId} is updated and all tasks is completed! Removing the job from the jobs collection", jobId);
             await Jobs.findOneAndDelete({ _id: jobId });
@@ -581,7 +581,7 @@ const handleJobs = async (context, runStatus) => {
             };
             logger.info("Updating the dispatch as completed and wiping the dispatch for personal information with JobId: {JobId}", jobId);
             await Dispatches.findOneAndUpdate(dispatchFilter, dispatchUpdate, {
-              new: true
+              returnDocument: "after"
             });
             logger.info("Successfully updated the dispatch as completed with JobId: {JobId}", jobId);
             await alertTeams([], "completed", [], "Job has been completed and removed from the jobs collection", jobId, context.functionName);
@@ -601,7 +601,7 @@ const handleJobs = async (context, runStatus) => {
             };
             logger.info("Updating the job with JobId: {JobId} as failed", jobId);
             await Jobs.findOneAndUpdate(filter, update, {
-              new: true
+              returnDocument: "after"
             });
             logger.info("Job with JobId {JobId} updated", jobId);
           }

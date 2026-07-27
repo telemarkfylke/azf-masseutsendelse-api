@@ -47,7 +47,7 @@ const completeDispatch = async (req) => {
     if (requestBody?.e18Id) completedData.e18Id = requestBody.e18Id;
 
     // Update the dispatch
-    const updatedDispatch = await Dispatches.findByIdAndUpdate(id, completedData, { new: true });
+    const updatedDispatch = await Dispatches.findByIdAndUpdate(id, completedData, { returnDocument: "after" });
     logger.info("Dispatch with Id {Id} has been completed by {User}", id, requestor.email);
 
     return response(updatedDispatch);

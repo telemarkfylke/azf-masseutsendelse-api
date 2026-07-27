@@ -29,7 +29,7 @@ const getTemplateById = async (req) => {
     }
 
     // Return the template object
-    const templateById = await Templates.findById(id, {}, { new: true });
+    const templateById = await Templates.findById(id, {}, { returnDocument: "after" });
     logger.info("Returning template with Id {Id}", id);
 
     return response(templateById);
