@@ -4,6 +4,7 @@ const blobClient = require("@vtfk/azure-blob-client");
 const allowedExtensions = require("../sharedcode/allowedExtensions.json");
 const { auth } = require("../sharedcode/auth/auth");
 const getDb = require("../sharedcode/connections/masseutsendelseDB.js");
+const { getDiff } = require("../sharedcode/helpers/get-diff");
 const Dispatches = require("../sharedcode/models/dispatches.js");
 const { errorResponse, response } = require("../sharedcode/response/response-handler");
 const validate = require("../sharedcode/validators/dispatches").validate;
@@ -12,6 +13,22 @@ const HTTPError = require("../sharedcode/vtfk-errors/httperror");
 const editDispatches = async (req) => {
   try {
     const requestBody = await req.json();
+
+    // Get ID from request
+    const id = req.params.id;
+
+    // Await the Db connection
+    await getDb();
+
+    // Get the existing dispatch object
+    const existingDispatch = await Dispatches.findById(id).lean();
+    if (!existingDispatch) {
+      return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse();
+    }
+
+    const requestDiff = getDiff(existingDispatch, requestBody, ["polygons", "stats"]);
+    const requestDiffKeys = Object.keys(requestDiff);
+
     delete requestBody._id;
 
     // Authentication / Authorization
@@ -28,18 +45,6 @@ const editDispatches = async (req) => {
     const unsets = {};
     if (Object.keys(requestBody).length === 2 && !requestBody.template) unsets.template = 1;
     if (requestBody.attachments && !requestBody.template) unsets.template = 1;
-
-    // Get ID from request
-    const id = req.params.id;
-
-    // Await the Db connection
-    await getDb();
-
-    // Get the existing dispatch object
-    const existingDispatch = await Dispatches.findById(id).lean();
-    if (!existingDispatch) {
-      return new HTTPError(404, `Dispatch with id ${id} could not be found`).toHTTPResponse();
-    }
 
     // If the status is running or completed, only status is allowed to be updated
     if (existingDispatch.status === "inprogress" && requestBody.status !== "completed") {
@@ -63,11 +68,17 @@ const editDispatches = async (req) => {
       requestBody.approvedById = requestor.id;
       requestBody.approvedByEmail = requestor.email;
       requestBody.approvedTimestamp = new Date();
+      logger.info("ApprovedBy: {Approver}", requestBody.approvedBy);
     }
+
     if (requestBody.status === "notapproved") {
       requestBody.approvedBy = "";
       requestBody.approvedById = "";
       requestBody.approvedTimestamp = "";
+
+      if (existingDispatch.status === "approved" && requestBody.status === "notapproved") {
+        logger.info("Approval retracted");
+      }
     }
 
     // Validate dispatch against scenarios that cannot be described by schema
@@ -118,7 +129,7 @@ const editDispatches = async (req) => {
         }
     }
 
-    logger.info("Dispatch with Id {Id} has been edited by {User}", id, requestor.email);
+    logger.info("Dispatch with Id {Id} has been edited by {User} with the following properties edited: {@RequestDiff}", id, requestor.email, requestDiffKeys);
     // Return the dispatch
     return response(updatedDispatch);
   } catch (err) {
