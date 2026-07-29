@@ -1,4 +1,4 @@
-const { verify } = require("azure-ad-verify-token");
+const azureAdVerifyTokenPromise = import("azure-ad-verify-token");
 const { logger } = require("@vestfoldfylke/loglady");
 const HTTPError = require("../../vtfk-errors/httperror");
 const { AZUREAD_TOKEN_CONFIG, MS, GRAPH } = require("../../../config");
@@ -31,6 +31,7 @@ module.exports = async (authHeader) => {
   };
 
   // Validation
+  const { verify } = await azureAdVerifyTokenPromise;
   let validatedToken;
   try {
     validatedToken = await verify(bearerToken.replace("Bearer ", ""), verifyConfig);

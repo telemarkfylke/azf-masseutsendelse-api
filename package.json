@@ -18,7 +18,7 @@
 		"@azure/storage-blob": "^12.33.0",
 		"@vestfoldfylke/loglady": "^2.1.0",
 		"@vtfk/azure-blob-client": "^0.2.0",
-		"azure-ad-verify-token": "^1.1.2",
+		"azure-ad-verify-token": "^3.0.3",
 		"dayjs": "^1.11.21",
 		"mongoose": "^9.8.0"
 	},
