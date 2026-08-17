@@ -1,4 +1,4 @@
-const azureAdVerifyTokenPromise = import("azure-ad-verify-token");
+const azureAdVerifyTokenPromise = require("azure-ad-verify-token");
 const { logger } = require("@vestfoldfylke/loglady");
 const HTTPError = require("../../vtfk-errors/httperror");
 const { AZUREAD_TOKEN_CONFIG, MS, GRAPH } = require("../../../config");
